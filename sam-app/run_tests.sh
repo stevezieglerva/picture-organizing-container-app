@@ -1,6 +1,5 @@
 #!/bin/bash
 source venv/bin/activate
-pip install -r requirements.txt
 rm reports/*.*
 
 echo "Args: $1, $2"

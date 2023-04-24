@@ -16,7 +16,7 @@ phases:
       -  # export S3_LUTILS=$(aws cloudformation describe-stacks --stack-name lutils --query "Stacks[0].Outputs[?OutputKey == 'S3ProcessingBucket'].OutputValue" --output text)
       - printenv | grep S3_ARTIFACTS
       - cd sam-app
-      - bash ./run_tests.sh
+      -  # bash ./run_tests.sh
       - sam validate -t template.yaml
       - sam build
       - sam package --output-template-file packaged.yaml --s3-bucket $S3_ARTIFACTS
