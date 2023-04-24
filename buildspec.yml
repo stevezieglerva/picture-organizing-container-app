@@ -3,13 +3,19 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.8
+      docker: 18
     commands:
-      - echo "Installing ..."
+      - echo Installing Docker
+      - apt-get update
+      - apt-get install -y docker-ce
+      - service docker start
+      - usermod -a -G docker ubuntu
       - pip install aws-sam-cli
-
   build:
     commands:
+      - echo Building your application
+      - sam build
+
       - export PIPELINE_STACK=get-picture-api-pipeline
       - export STACK_TO_BUILD=get-picture-api
       - export S3_ARTIFACTS=$(aws cloudformation describe-stacks --stack-name $PIPELINE_STACK --query "Stacks[0].Outputs[?OutputKey == 'S3Artifacts'].OutputValue" --output text)
