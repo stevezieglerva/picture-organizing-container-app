@@ -1,0 +1,3 @@
+html-testRunner
+coverage
+boto3

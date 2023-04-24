@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo "Installing ..."
+      - pip install aws-sam-cli
+
+  build:
+    commands:
+      - export PIPELINE_STACK=get-picture-api-pipeline
+      - export STACK_TO_BUILD=get-picture-api
+      - export S3_ARTIFACTS=$(aws cloudformation describe-stacks --stack-name $PIPELINE_STACK --query "Stacks[0].Outputs[?OutputKey == 'S3Artifacts'].OutputValue" --output text)
+      -  # export S3_LUTILS=$(aws cloudformation describe-stacks --stack-name lutils --query "Stacks[0].Outputs[?OutputKey == 'S3ProcessingBucket'].OutputValue" --output text)
+      - printenv | grep S3_ARTIFACTS
+      - cd sam-app
+      - bash ./run_tests.sh
+      - sam validate -t template.yaml
+      - sam build
+      - sam package --output-template-file packaged.yaml --s3-bucket $S3_ARTIFACTS
+      - sam deploy --template-file packaged.yaml --stack-name $STACK_TO_BUILD --capabilities CAPABILITY_IAM --parameter-overrides LutilsBucket=$S3_LUTILS
+      - aws cloudformation describe-stacks --stack-name $STACK_TO_BUILD --query 'Stacks[].Outputs' --output table
