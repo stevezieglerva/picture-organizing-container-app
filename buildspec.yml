@@ -6,9 +6,6 @@ phases:
       - pip install aws-sam-cli
   build:
     commands:
-      - echo Building your application
-      - sam build
-
       - export PIPELINE_STACK=get-picture-api-pipeline
       - export STACK_TO_BUILD=get-picture-api
       - export S3_ARTIFACTS=$(aws cloudformation describe-stacks --stack-name $PIPELINE_STACK --query "Stacks[0].Outputs[?OutputKey == 'S3Artifacts'].OutputValue" --output text)
