@@ -2,14 +2,7 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      docker: 18
     commands:
-      - echo Installing Docker
-      - apt-get update
-      - apt-get install -y docker-ce
-      - service docker start
-      - usermod -a -G docker ubuntu
       - pip install aws-sam-cli
   build:
     commands:
