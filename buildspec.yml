@@ -15,6 +15,6 @@ phases:
       -  # bash ./run_tests.sh
       - sam validate -t template.yaml
       - sam build --use-container
-      - sam package --output-template-file packaged.yaml --s3-bucket $S3_ARTIFACTS
+      - sam package --output-template-file packaged.yaml --s3-bucket $S3_ARTIFACTS --image-repository 112280397275.dkr.ecr.us-east-1.amazonaws.com/get-picture-api
       - sam deploy --template-file packaged.yaml --stack-name $STACK_TO_BUILD --capabilities CAPABILITY_IAM --parameter-overrides LutilsBucket=$S3_LUTILS
       - aws cloudformation describe-stacks --stack-name $STACK_TO_BUILD --query 'Stacks[].Outputs' --output table
