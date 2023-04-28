@@ -1,3 +1,9 @@
 html-testRunner
 coverage
 boto3
+imagehash
+exif
+exif
+gpsphoto
+exifread
+piexif

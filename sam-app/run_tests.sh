@@ -1,5 +1,6 @@
 #!/bin/bash
 source venv/bin/activate
+export PYTHONPATH=common_layer/python
 rm reports/*.*
 
 echo "Args: $1, $2"
