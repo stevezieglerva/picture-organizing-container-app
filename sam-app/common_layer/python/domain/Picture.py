@@ -76,17 +76,13 @@ class ImageIOLocal:
                 f"{extension} is not valid so can't find valid image format."
             )
 
-        buffer = BytesIO()
         current_exif = image.info.get("exif", None)
         if current_exif == None:
             print("saving without exif")
-            image.save(buffer, format)
+            return image.save(new_path, format)
         else:
             print("saving with exif")
-            print(current_exif)
-            print(current_exif.gps_latitutude)
-            image.save(buffer, format, exif=current_exif)
-        return image.save(new_path)
+            return image.save(new_path, format, exif=image.info["exif"])
 
     def get_image_bytes(self, source):
         with open(source, "rb") as file:
