@@ -1,0 +1,1 @@
+export PYTHONPATH=../sam-app/common_layer/python

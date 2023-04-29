@@ -224,11 +224,11 @@ class Picture:
             self.gis_long = round(long_degrees, 7)
 
     def __str__(self):
-        text = f"""source: {self.source}
+        text = f"""source:      {self.source}
 taken        {self.taken}
 width:       {self.width}
 height:      {self.height}
-aspect:       {round(self.width / self.height, 2)}
+aspect:      {round(self.width / self.height, 2)}
 orientation: {self.orientation}
 model:       {self.model}
 lat:         {self.gis_lat}
