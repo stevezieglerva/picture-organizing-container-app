@@ -112,6 +112,8 @@ class Basic(unittest.TestCase):
         self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-02"))
         self.assertEqual(results.picture.gsi2_pk, "DATE_ADDED#portrait")
         self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
+        self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY#01-13")
+        self.assertTrue(results.picture.gsi3_sk.startswith("2023-01-13"))
 
 
 if __name__ == "__main__":

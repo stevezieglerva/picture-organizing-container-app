@@ -94,6 +94,7 @@ class PictureCatalogRepo(StoringCatalogData):
         if picture.gis_long != None:
             gis_long = picture.gis_long
         random_shown = random.randint(1, 100)
+        on_this_day = picture.taken.strftime("%m-%d")
         picture_record = PictureRecord(
             pk=f"PICTURE#{picture.source}",
             sk="-",
@@ -101,6 +102,8 @@ class PictureCatalogRepo(StoringCatalogData):
             gsi1_sk=f"{date_updated.strftime('%Y-%m-%d')}_{random_shown}",
             gsi2_pk=f"DATE_ADDED#{layout}",
             gsi2_sk=f"{date_added.isoformat()}",
+            gsi3_pk=f"ON_THIS_DAY#{on_this_day}",
+            gsi3_sk=f"{picture.taken.isoformat()}",
             ulid=str(ULID()),
             s3_url=picture.source,
             date_taken=picture.taken,
