@@ -47,10 +47,7 @@ Resources:
           AttributeType: "S"
         - AttributeName: "gsi2_sk"
           AttributeType: "S"
-        - AttributeName: "gsi3_pk"
-          AttributeType: "S"
-        - AttributeName: "gsi3_sk"
-          AttributeType: "S"
+
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
