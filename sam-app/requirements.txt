@@ -7,3 +7,4 @@ exif
 gpsphoto
 exifread
 piexif
+python-ulid

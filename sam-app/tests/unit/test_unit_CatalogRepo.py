@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from domain.Picture import ImageIOLocal, Picture
@@ -53,12 +54,16 @@ class RecordConversion(unittest.TestCase):
     def test_should_convert_picture_to_catalogs(self):
         # Arrange
         pic = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
-
+        print(pic)
         # Act
-        results = convert_picture_to_catalogrecords(pic)
+        results = convert_picture_to_catalogrecords(pic, datetime(2023, 1, 2, 3, 4, 5))
         print(f"test results: {results}")
 
         # Assert
+        self.assertEqual(
+            results.picture.pk, "PICTURE#tests/unit/data/picture_files/with_gps.jpg"
+        )
+        self.assertEqual(results.picture.sk, "-")
         self.assertEqual(
             results.picture.s3_url, "tests/unit/data/picture_files/with_gps.jpg"
         )
