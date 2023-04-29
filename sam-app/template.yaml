@@ -33,6 +33,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: master-pictures-catalog
+      BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
