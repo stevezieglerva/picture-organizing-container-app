@@ -95,9 +95,9 @@ def convert_picture_to_catalogrecords_for_insert(
         hash_crop_resistant=str(picture.hash_crop_resistant),
         hash_phash=str(picture.hash_phash),
         hash_unique=str(picture.hash_unique),
-        year=0,
-        month=0,
-        day=0,
+        year=picture.taken.year,
+        month=picture.taken.month,
+        day=picture.taken.day,
         model=picture.model,
     )
     return PictureCatalogGroup(picture=picture_record)

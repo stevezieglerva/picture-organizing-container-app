@@ -77,6 +77,14 @@ class RecordConversion(unittest.TestCase):
         self.assertEqual(results.picture.width, 3024)
         self.assertEqual(results.picture.model, "iPhone 12")
         self.assertEqual(results.picture.layout, "portrait")
+        self.assertEqual(results.picture.view_count, 0)
+        self.assertTrue(results.picture.hash_average_hash != "")
+        self.assertTrue(results.picture.hash_crop_resistant != "")
+        self.assertTrue(results.picture.hash_phash != "")
+        self.assertTrue(results.picture.hash_unique != "")
+        self.assertEqual(results.picture.year, 2023)
+        self.assertEqual(results.picture.month, 1)
+        self.assertEqual(results.picture.day, 13)
 
 
 class Basic(unittest.TestCase):
