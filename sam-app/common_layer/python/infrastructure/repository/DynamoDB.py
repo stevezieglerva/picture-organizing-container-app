@@ -12,45 +12,51 @@ class RecordNotFound(Exception):
 
 class UsingDynamoDB(ABC):
     @abstractmethod
-    def __init__(self, table_name):
+    def __init__(self, table_name) -> None:
         raise NotImplemented
 
     @abstractmethod
-    def put_item(self, record):
+    def put_item(self, record) -> None:
         raise NotImplemented
 
     @abstractmethod
-    def get_item(self, key):
+    def get_item(self, key) -> dict:
         raise NotImplemented
 
     @abstractmethod
-    def delete_item(self, key):
+    def delete_item(self, key) -> None:
         raise NotImplemented
 
     @abstractmethod
-    def query_table_equal(self, key, index_name="", scan_index_forward: bool = True):
+    def query_table_equal(
+        self, key, index_name="", scan_index_forward: bool = True
+    ) -> list:
         raise NotImplemented
 
     @abstractmethod
     def query_table_greater_than(
         self, key, index_name="", scan_index_forward: bool = True
-    ):
+    ) -> list:
         raise NotImplemented
 
     @abstractmethod
-    def query_table_begins(self, key, index_name="", scan_index_forward: bool = True):
+    def query_table_begins(
+        self, key, index_name="", scan_index_forward: bool = True
+    ) -> list:
         raise NotImplemented
 
     @abstractmethod
-    def query_table_between(self, key, index_name="", scan_index_forward: bool = True):
+    def query_table_between(
+        self, key, index_name="", scan_index_forward: bool = True
+    ) -> list:
         raise NotImplemented
 
     @abstractmethod
-    def query_index_begins(self, index_name, key):
+    def query_index_begins(self, index_name, key) -> list:
         raise NotImplemented
 
     @abstractmethod
-    def scan_full(self):
+    def scan_full(self) -> list:
         raise NotImplemented
 
     def _set_key_fields(self):
@@ -131,7 +137,7 @@ class DynamoDB(UsingDynamoDB):
         key_schema = table_resp["Table"]["KeySchema"]
         self.key_fields = [k["AttributeName"] for k in key_schema]
 
-    def put_item(self, record):
+    def put_item(self, record) -> None:
         if self._ttl != None:
             ttl = self._calculate_ttl_epoch()
             record["ttl"] = ttl
@@ -149,7 +155,7 @@ class DynamoDB(UsingDynamoDB):
             converted_results.append(self.convert_from_dict_format(item))
         return converted_results
 
-    def get_item(self, key):
+    def get_item(self, key) -> dict:
         assert type(key) == dict, "Expecting key to be of type dict"
         db_format = self.convert_to_dynamodb_format(key)
         # print(f"Getting: {db_format}")
@@ -159,13 +165,15 @@ class DynamoDB(UsingDynamoDB):
         results = self.convert_from_dynamodb_format(db_record)
         return results
 
-    def delete_item(self, key):
+    def delete_item(self, key) -> None:
         assert type(key) == dict, "Expecting key to be of type dict"
         db_format = self.convert_to_dynamodb_format(key)
         # print(f"Deleting: {db_format}")
         db_record = self._db.delete_item(TableName=self.table_name, Key=db_format)
 
-    def query_table_equal(self, key, index_name="", scan_index_forward: bool = True):
+    def query_table_equal(
+        self, key, index_name="", scan_index_forward: bool = True
+    ) -> dict:
         expression_names_mapping = {}
         for count, key_name in enumerate(key.keys()):
             expression_names_mapping[key_name] = f"#{key_name}"
