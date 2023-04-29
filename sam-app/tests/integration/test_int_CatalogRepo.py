@@ -60,6 +60,27 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.day, 13)
         self.assertTrue("-created" in results.picture.update_desc)
 
+    def test_should_add_new_picture_to_catalog_without_gps(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+        picture = Picture(
+            "tests/unit/data/picture_files/without_gps.jpg", ImageIOLocal()
+        )
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.picture.gis_lat, -1)
+        self.assertEqual(results.picture.gis_long, -1)
+
 
 if __name__ == "__main__":
     unittest.main()

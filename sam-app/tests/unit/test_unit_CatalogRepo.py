@@ -62,7 +62,7 @@ class Basic(unittest.TestCase):
             FakeClock("2023-01-01"),
         )
 
-    def test_should_add_new_picture_to_catalog(self):
+    def test_should_add_new_picture_to_catalog_with_gps(self):
         # Arrange
         subject = PictureCatalogRepo(
             FakeDynamoDB("xyz"),
@@ -110,6 +110,8 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.gis_long, -78.9425722)
         self.assertEqual(results.picture.gsi1_pk, "LAST_SHOWN#portrait")
         self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-02"))
+        self.assertEqual(results.picture.gsi2_pk, "DATE_ADDED#portrait")
+        self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
 
 
 if __name__ == "__main__":

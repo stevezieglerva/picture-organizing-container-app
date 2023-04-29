@@ -99,6 +99,8 @@ class PictureCatalogRepo(StoringCatalogData):
             sk="-",
             gsi1_pk=f"LAST_SHOWN#{layout}",
             gsi1_sk=f"{date_updated.strftime('%Y-%m-%d')}_{random_shown}",
+            gsi2_pk=f"DATE_ADDED#{layout}",
+            gsi2_sk=f"{date_added.isoformat()}",
             ulid=str(ULID()),
             s3_url=picture.source,
             date_taken=picture.taken,
