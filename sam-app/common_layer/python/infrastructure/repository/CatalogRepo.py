@@ -15,7 +15,7 @@ class PictureRecord:
     ulid: str
     s3_url: str
     date_taken: datetime
-    data_added: datetime
+    date_added: datetime
     date_updated: datetime
     height: int
     width: int
@@ -37,6 +37,7 @@ class PictureRecord:
     gis_lat: float = None
     gis_long: float = None
     last_shown: datetime = datetime(1900, 1, 1, 1, 1, 1)
+    model: str = ""
 
 
 # {
@@ -72,20 +73,23 @@ class PictureCatalogGroup:
     picture: PictureRecord
 
 
-def convert_picture_to_catalogrecords(
+def convert_picture_to_catalogrecords_for_insert(
     picture: Picture, now: datetime
 ) -> PictureCatalogGroup:
+    layout = "landscape"
+    if picture.height > picture.width:
+        layout = "portrait"
     picture_record = PictureRecord(
         pk=f"PICTURE#{picture.source}",
         sk="-",
         ulid=str(ULID()),
         s3_url=picture.source,
         date_taken=picture.taken,
-        data_added=now,
+        date_added=now,
         date_updated=now,
         height=picture.height,
         width=picture.width,
-        layout="x",
+        layout=layout,
         view_count=0,
         hash_average_hash=str(picture.hash_average_hash),
         hash_crop_resistant=str(picture.hash_crop_resistant),
@@ -94,6 +98,7 @@ def convert_picture_to_catalogrecords(
         year=0,
         month=0,
         day=0,
+        model=picture.model,
     )
     return PictureCatalogGroup(picture=picture_record)
 

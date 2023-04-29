@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 from domain.Picture import ImageIOLocal, Picture
 from infrastructure.repository.CatalogRepo import (
     PictureCatalogRepo,
-    convert_picture_to_catalogrecords,
+    convert_picture_to_catalogrecords_for_insert,
 )
 from infrastructure.repository.DynamoDB import UsingDynamoDB
 
@@ -56,7 +56,9 @@ class RecordConversion(unittest.TestCase):
         pic = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
         print(pic)
         # Act
-        results = convert_picture_to_catalogrecords(pic, datetime(2023, 1, 2, 3, 4, 5))
+        results = convert_picture_to_catalogrecords_for_insert(
+            pic, datetime(2023, 1, 2, 3, 4, 5)
+        )
         print(f"test results: {results}")
 
         # Assert
@@ -64,9 +66,17 @@ class RecordConversion(unittest.TestCase):
             results.picture.pk, "PICTURE#tests/unit/data/picture_files/with_gps.jpg"
         )
         self.assertEqual(results.picture.sk, "-")
+        self.assertTrue(results.picture.ulid != "")
         self.assertEqual(
             results.picture.s3_url, "tests/unit/data/picture_files/with_gps.jpg"
         )
+        self.assertEqual(results.picture.date_taken, datetime(2023, 1, 13, 7, 43, 54))
+        self.assertEqual(results.picture.date_added, datetime(2023, 1, 2, 3, 4, 5))
+        self.assertEqual(results.picture.date_updated, datetime(2023, 1, 2, 3, 4, 5))
+        self.assertEqual(results.picture.height, 4032)
+        self.assertEqual(results.picture.width, 3024)
+        self.assertEqual(results.picture.model, "iPhone 12")
+        self.assertEqual(results.picture.layout, "portrait")
 
 
 class Basic(unittest.TestCase):
