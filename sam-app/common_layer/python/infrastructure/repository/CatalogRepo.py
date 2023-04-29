@@ -1,4 +1,5 @@
 import json
+import random
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -31,44 +32,16 @@ class PictureRecord:
     month: int
     day: int
     update_desc: str
-    gsi1_pk: str = ""
-    gsi1_sk: str = ""
-    gsi2_pk: str = ""
-    gsi2_sk: str = ""
-    gsi3_pk: str = ""
-    gsi3_sk: str = ""
+    gsi1_pk: str = "-"
+    gsi1_sk: str = "-"
+    gsi2_pk: str = "-"
+    gsi2_sk: str = "-"
+    gsi3_pk: str = "-"
+    gsi3_sk: str = "-"
     gis_lat: float = -1
     gis_long: float = -1
     last_shown: datetime = datetime(1900, 1, 1, 1, 1, 1)
     model: str = ""
-
-
-# {
-#  "pk": "ORIGINAL_PICTURE#original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
-#  "sk": "-",
-#  "date_added": "2020-01-05T14:04:27.546226",
-#  "date_taken": "2016-06-28",
-#  "date_updated": "2023-04-24T10:31:35.978645",
-#  "day": 28,
-#  "gsi1_pk": "LAST_SHOWN#landscape",
-#  "gsi1_sk": "2023-04-24_81",
-#  "gsi2_pk": "DATE_ADDED#landscape",
-#  "gsi2_sk": "2020-01-05T14:04:27.546226",
-#  "hash_average_hash": "030078e0c0f4feff",
-#  "hash_crop_resistant": "0706061e3ab2c24b,b2e3090984346030,06baf24b28099430",
-#  "hash_phash": "f9298474f2c7c2c9",
-#  "hash_unique": "1f4550fc769debc4023299205427e6ef",
-#  "height": 3456,
-#  "last_shown": "2023-04-24T00:32:23.502142",
-#  "layout": "landscape",
-#  "month": 6,
-#  "random": 0,
-#  "s3_url": "original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
-#  "s3_url_lower": "original/2016/2016_06_28_omni_homestead_2016_06_28_999_10_-_copy.jpg",
-#  "view_count": 3,
-#  "width": 5184,
-#  "year": 2016
-# }
 
 
 @dataclass(frozen=True)
@@ -120,9 +93,12 @@ class PictureCatalogRepo(StoringCatalogData):
         gis_long = -1
         if picture.gis_long != None:
             gis_long = picture.gis_long
+        random_shown = random.randint(1, 100)
         picture_record = PictureRecord(
             pk=f"PICTURE#{picture.source}",
             sk="-",
+            gsi1_pk=f"LAST_SHOWN#{layout}",
+            gsi1_sk=f"{date_updated.strftime('%Y-%m-%d')}_{random_shown}",
             ulid=str(ULID()),
             s3_url=picture.source,
             date_taken=picture.taken,
@@ -145,3 +121,31 @@ class PictureCatalogRepo(StoringCatalogData):
             gis_long=gis_long,
         )
         return PictureCatalogGroup(picture=picture_record)
+
+
+# {
+#  "pk": "ORIGINAL_PICTURE#original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
+#  "sk": "-",
+#  "date_added": "2020-01-05T14:04:27.546226",
+#  "date_taken": "2016-06-28",
+#  "date_updated": "2023-04-24T10:31:35.978645",
+#  "day": 28,
+#  "gsi1_pk": "LAST_SHOWN#landscape",
+#  "gsi1_sk": "2023-04-24_81",
+#  "gsi2_pk": "DATE_ADDED#landscape",
+#  "gsi2_sk": "2020-01-05T14:04:27.546226",
+#  "hash_average_hash": "030078e0c0f4feff",
+#  "hash_crop_resistant": "0706061e3ab2c24b,b2e3090984346030,06baf24b28099430",
+#  "hash_phash": "f9298474f2c7c2c9",
+#  "hash_unique": "1f4550fc769debc4023299205427e6ef",
+#  "height": 3456,
+#  "last_shown": "2023-04-24T00:32:23.502142",
+#  "layout": "landscape",
+#  "month": 6,
+#  "random": 0,
+#  "s3_url": "original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
+#  "s3_url_lower": "original/2016/2016_06_28_omni_homestead_2016_06_28_999_10_-_copy.jpg",
+#  "view_count": 3,
+#  "width": 5184,
+#  "year": 2016
+# }

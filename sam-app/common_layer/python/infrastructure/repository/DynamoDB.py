@@ -77,7 +77,7 @@ class UsingDynamoDB(ABC):
             if type(v) == int or type(v) == float:
                 data_type = "N"
             if type(v) == datetime:
-                data_type = "N"
+                data_type = "S"
             if type(v) == dict:
                 # convert to string for storage instead of using complicated dynamobd format for dicts
                 data_type = "S"

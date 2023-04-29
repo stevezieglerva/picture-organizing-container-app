@@ -108,6 +108,8 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.update_desc, "01/02/23-created")
         self.assertEqual(results.picture.gis_lat, 35.7275917)
         self.assertEqual(results.picture.gis_long, -78.9425722)
+        self.assertEqual(results.picture.gsi1_pk, "LAST_SHOWN#portrait")
+        self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-02"))
 
 
 if __name__ == "__main__":
