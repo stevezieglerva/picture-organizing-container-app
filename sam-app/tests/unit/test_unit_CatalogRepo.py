@@ -17,7 +17,7 @@ class FakeDynamoDB(UsingDynamoDB):
         self.table_name = table_name
 
     def put_item(self, record) -> None:
-        raise NotImplemented
+        pass
 
     def get_item(self, key) -> dict:
         raise NotImplemented
@@ -69,6 +69,7 @@ class Basic(unittest.TestCase):
             FakeClock("2023-01-02 03:04:05"),
         )
         picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
+        print(picture)
 
         # Act
         results = subject.add_new_picture_to_catalog(
@@ -105,6 +106,8 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.month, 1)
         self.assertEqual(results.picture.day, 13)
         self.assertEqual(results.picture.update_desc, "01/02/23-created")
+        self.assertEqual(results.picture.gis_lat, 35.7275917)
+        self.assertEqual(results.picture.gis_long, -78.9425722)
 
 
 if __name__ == "__main__":

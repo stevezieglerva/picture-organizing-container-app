@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -36,8 +37,8 @@ class PictureRecord:
     gsi2_sk: str = ""
     gsi3_pk: str = ""
     gsi3_sk: str = ""
-    gis_lat: float = None
-    gis_long: float = None
+    gis_lat: float = -1
+    gis_long: float = -1
     last_shown: datetime = datetime(1900, 1, 1, 1, 1, 1)
     model: str = ""
 
@@ -91,13 +92,16 @@ class PictureCatalogRepo(StoringCatalogData):
         self._clock = clock
 
     def add_new_picture_to_catalog(self, picture: Picture) -> PictureCatalogGroup:
-
-        return self._convert_picture_to_catalogrecords(
+        records = self._convert_picture_to_catalogrecords(
             picture,
             self._clock.get_time(),
             self._clock.get_time(),
             "created",
         )
+        picture_json = asdict(records.picture)
+        print(f"Adding picture: {json.dumps(picture_json, indent=3, default=str)}")
+        self._db.put_item(picture_json)
+        return records
 
     def _convert_picture_to_catalogrecords(
         self,
@@ -110,6 +114,12 @@ class PictureCatalogRepo(StoringCatalogData):
         if picture.height > picture.width:
             layout = "portrait"
         update_tmsp = date_updated.strftime("%m/%d/%y")
+        gis_lat = -1
+        if picture.gis_lat != None:
+            gis_lat = picture.gis_lat
+        gis_long = -1
+        if picture.gis_long != None:
+            gis_long = picture.gis_long
         picture_record = PictureRecord(
             pk=f"PICTURE#{picture.source}",
             sk="-",
@@ -131,5 +141,7 @@ class PictureCatalogRepo(StoringCatalogData):
             day=picture.taken.day,
             model=picture.model,
             update_desc=f"{update_tmsp}-{new_update_desc}",
+            gis_lat=gis_lat,
+            gis_long=gis_long,
         )
         return PictureCatalogGroup(picture=picture_record)

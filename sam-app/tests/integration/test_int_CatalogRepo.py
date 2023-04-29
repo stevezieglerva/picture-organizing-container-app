@@ -18,15 +18,15 @@ class Basic(unittest.TestCase):
 
         # Act
         subject = PictureCatalogRepo(
-            DynamoDB("master-pictures-catalog"),
+            DynamoDB("master-pictures-catalog-test"),
             RealClock(),
         )
 
     def test_should_add_new_picture_to_catalog(self):
         # Arrange
         subject = PictureCatalogRepo(
-            DynamoDB("xyz"),
-            RealClock("2023-01-02 03:04:05"),
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
         )
         picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
 
@@ -46,12 +46,6 @@ class Basic(unittest.TestCase):
             results.picture.s3_url, "tests/unit/data/picture_files/with_gps.jpg"
         )
         self.assertEqual(results.picture.date_taken, datetime(2023, 1, 13, 7, 43, 54))
-        self.assertEqual(
-            results.picture.date_added, FakeClock("2023-01-02 03:04:05").get_time()
-        )
-        self.assertEqual(
-            results.picture.date_updated, FakeClock("2023-01-02 03:04:05").get_time()
-        )
         self.assertEqual(results.picture.height, 4032)
         self.assertEqual(results.picture.width, 3024)
         self.assertEqual(results.picture.model, "iPhone 12")
@@ -64,7 +58,7 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.year, 2023)
         self.assertEqual(results.picture.month, 1)
         self.assertEqual(results.picture.day, 13)
-        self.assertEqual(results.picture.update_desc, "1/2/23-created")
+        self.assertTrue("-created" in results.picture.update_desc)
 
 
 if __name__ == "__main__":

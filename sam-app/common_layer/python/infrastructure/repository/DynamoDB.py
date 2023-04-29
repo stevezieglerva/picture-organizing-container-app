@@ -16,15 +16,15 @@ class UsingDynamoDB(ABC):
         raise NotImplemented
 
     @abstractmethod
-    def put_item(self, record) -> None:
+    def put_item(self, record: dict) -> None:
         raise NotImplemented
 
     @abstractmethod
-    def get_item(self, key) -> dict:
+    def get_item(self, key: dict) -> dict:
         raise NotImplemented
 
     @abstractmethod
-    def delete_item(self, key) -> None:
+    def delete_item(self, ke: dict) -> None:
         raise NotImplemented
 
     @abstractmethod
@@ -138,6 +138,7 @@ class DynamoDB(UsingDynamoDB):
         self.key_fields = [k["AttributeName"] for k in key_schema]
 
     def put_item(self, record) -> None:
+        assert type(record) == dict, "record parameter needs to a dict"
         if self._ttl != None:
             ttl = self._calculate_ttl_epoch()
             record["ttl"] = ttl
