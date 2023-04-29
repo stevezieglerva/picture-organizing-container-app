@@ -39,14 +39,14 @@ Resources:
           AttributeType: "S"
         - AttributeName: "sk"
           AttributeType: "S"
+        - AttributeName: "gsi1_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi1_sk"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
         - AttributeName: "sk"
-          KeyType: "RANGE"
-        - AttributeName: "gsi1_pk"
-          KeyType: "HASH"
-        - AttributeName: "gsi1_sk"
           KeyType: "RANGE"
       # ProvisionedThroughput:
       #   ReadCapacityUnits: 2

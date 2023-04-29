@@ -2,7 +2,10 @@ import unittest
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from infrastructure.repository.CatalogRepo import CatalogRepo
-from infrastructure.repository.DynamoDB import DynamoDB
+from infrastructure.repository.DynamoDB import UsingDynamoDB
+
+class FakeDynamoDB(UsingDynamoDB):
+    
 
 
 class Basic(unittest.TestCase):

@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from time import time
 
@@ -9,13 +10,48 @@ class RecordNotFound(Exception):
     pass
 
 
-class DynamoDB:
+class UsingDynamoDB(ABC):
+    @abstractmethod
     def __init__(self, table_name):
-        self._db = boto3.client("dynamodb")
-        self.table_name = table_name
-        self._set_key_fields()
-        self._ttl = None
-        self.limit = 2000
+        raise NotImplemented
+
+    @abstractmethod
+    def put_item(self, record):
+        raise NotImplemented
+
+    @abstractmethod
+    def get_item(self, key):
+        raise NotImplemented
+
+    @abstractmethod
+    def delete_item(self, key):
+        raise NotImplemented
+
+    @abstractmethod
+    def query_table_equal(self, key, index_name="", scan_index_forward: bool = True):
+        raise NotImplemented
+
+    @abstractmethod
+    def query_table_greater_than(
+        self, key, index_name="", scan_index_forward: bool = True
+    ):
+        raise NotImplemented
+
+    @abstractmethod
+    def query_table_begins(self, key, index_name="", scan_index_forward: bool = True):
+        raise NotImplemented
+
+    @abstractmethod
+    def query_table_between(self, key, index_name="", scan_index_forward: bool = True):
+        raise NotImplemented
+
+    @abstractmethod
+    def query_index_begins(self, index_name, key):
+        raise NotImplemented
+
+    @abstractmethod
+    def scan_full(self):
+        raise NotImplemented
 
     def _set_key_fields(self):
         table_resp = self._db.describe_table(TableName=self.table_name)
@@ -24,19 +60,6 @@ class DynamoDB:
 
     def set_ttl_seconds(self, seconds):
         self._ttl = seconds
-
-    def put_item(self, record):
-        if self._ttl != None:
-            ttl = self._calculate_ttl_epoch()
-            record["ttl"] = ttl
-        # print(f"record: {record}")
-        db_format = self.convert_to_dynamodb_format(record)
-        self._db.put_item(TableName=self.table_name, Item=db_format)
-        # print(f"put item successful: {db_format}")
-
-    def _calculate_ttl_epoch(self):
-        future_time = datetime.now() + timedelta(self._ttl)
-        return int(future_time.strftime("%s"))
 
     def convert_to_dynamodb_format(self, record):
         results = {}
@@ -89,6 +112,38 @@ class DynamoDB:
         return results
 
     def convert_list_from_dynamodb_format(self, query_results):
+        converted_results = []
+        for item in query_results["Items"]:
+            converted_results.append(self.convert_from_dict_format(item))
+        return converted_results
+
+
+class DynamoDB(UsingDynamoDB):
+    def __init__(self, table_name):
+        self._db = boto3.client("dynamodb")
+        self.table_name = table_name
+        self._set_key_fields()
+        self._ttl = None
+        self.limit = 2000
+
+    def _set_key_fields(self):
+        table_resp = self._db.describe_table(TableName=self.table_name)
+        key_schema = table_resp["Table"]["KeySchema"]
+        self.key_fields = [k["AttributeName"] for k in key_schema]
+
+    def put_item(self, record):
+        if self._ttl != None:
+            ttl = self._calculate_ttl_epoch()
+            record["ttl"] = ttl
+        # print(f"record: {record}")
+        db_format = self.convert_to_dynamodb_format(record)
+        self._db.put_item(TableName=self.table_name, Item=db_format)
+        # print(f"put item successful: {db_format}")
+
+    def _calculate_ttl_epoch(self):
+        future_time = datetime.now() + timedelta(self._ttl)
+        return int(future_time.strftime("%s"))
+
         converted_results = []
         for item in query_results["Items"]:
             converted_results.append(self.convert_from_dict_format(item))
