@@ -90,6 +90,67 @@ Resources:
         - Key: "Type"
           Value: "picture-organizing"
 
+  CatalogTestDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: master-pictures-catalog-test
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+        - AttributeName: "sk"
+          AttributeType: "S"
+        - AttributeName: "gsi1_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi1_sk"
+          AttributeType: "S"
+        - AttributeName: "gsi2_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi2_sk"
+          AttributeType: "S"
+        - AttributeName: "gsi3_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi3_sk"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+        - AttributeName: "sk"
+          KeyType: "RANGE"
+      # ProvisionedThroughput:
+      #   ReadCapacityUnits: 2
+      #   WriteCapacityUnits: 2
+      GlobalSecondaryIndexes:
+        - IndexName: gsi1
+          KeySchema:
+            - AttributeName: gsi1_pk
+              KeyType: HASH
+            - AttributeName: gsi1_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: gsi2
+          KeySchema:
+            - AttributeName: gsi2_pk
+              KeyType: HASH
+            - AttributeName: gsi2_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: gsi3
+          KeySchema:
+            - AttributeName: gsi3_pk
+              KeyType: HASH
+            - AttributeName: gsi3_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: "Type"
+          Value: "picture-organizing"
+
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
