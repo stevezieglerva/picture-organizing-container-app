@@ -5,6 +5,7 @@ from datetime import datetime
 from domain import Picture
 from domain.Picture import Picture
 from infrastructure.repository.DynamoDB import UsingDynamoDB
+from infrastructure.system.Clock import ITellingTime
 from ulid import ULID
 
 
@@ -73,49 +74,51 @@ class PictureCatalogGroup:
     picture: PictureRecord
 
 
-def convert_picture_to_catalogrecords_for_insert(
-    picture: Picture, now: datetime
-) -> PictureCatalogGroup:
-    layout = "landscape"
-    if picture.height > picture.width:
-        layout = "portrait"
-    picture_record = PictureRecord(
-        pk=f"PICTURE#{picture.source}",
-        sk="-",
-        ulid=str(ULID()),
-        s3_url=picture.source,
-        date_taken=picture.taken,
-        date_added=now,
-        date_updated=now,
-        height=picture.height,
-        width=picture.width,
-        layout=layout,
-        view_count=0,
-        hash_average_hash=str(picture.hash_average_hash),
-        hash_crop_resistant=str(picture.hash_crop_resistant),
-        hash_phash=str(picture.hash_phash),
-        hash_unique=str(picture.hash_unique),
-        year=picture.taken.year,
-        month=picture.taken.month,
-        day=picture.taken.day,
-        model=picture.model,
-    )
-    return PictureCatalogGroup(picture=picture_record)
-
-
 class StoringCatalogData(ABC):
     @abstractmethod
     def __init__(self, db: UsingDynamoDB):
         raise NotImplemented
 
     @abstractmethod
-    def write_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
+    def add_new_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
         raise NotImplemented
 
 
 class PictureCatalogRepo(StoringCatalogData):
-    def __init__(self, db: UsingDynamoDB):
+    def __init__(self, db: UsingDynamoDB, clock: ITellingTime):
         self._db = db
+        self._clock = clock
 
-    def write_picture_to_catalog(self, record: PictureCatalogGroup):
-        raise NotImplemented
+    def add_new_picture_to_catalog(self, picture: Picture) -> PictureCatalogGroup:
+        return self._convert_picture_to_catalogrecords(
+            picture, self._clock.get_time(), self._clock.get_time()
+        )
+
+    def _convert_picture_to_catalogrecords(
+        self, picture: Picture, date_added: datetime, date_updated: datetime
+    ) -> PictureCatalogGroup:
+        layout = "landscape"
+        if picture.height > picture.width:
+            layout = "portrait"
+        picture_record = PictureRecord(
+            pk=f"PICTURE#{picture.source}",
+            sk="-",
+            ulid=str(ULID()),
+            s3_url=picture.source,
+            date_taken=picture.taken,
+            date_added=date_added,
+            date_updated=date_updated,
+            height=picture.height,
+            width=picture.width,
+            layout=layout,
+            view_count=0,
+            hash_average_hash=str(picture.hash_average_hash),
+            hash_crop_resistant=str(picture.hash_crop_resistant),
+            hash_phash=str(picture.hash_phash),
+            hash_unique=str(picture.hash_unique),
+            year=picture.taken.year,
+            month=picture.taken.month,
+            day=picture.taken.day,
+            model=picture.model,
+        )
+        return PictureCatalogGroup(picture=picture_record)
