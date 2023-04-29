@@ -47,15 +47,15 @@ Resources:
           AttributeType: "S"
         - AttributeName: "gsi2_sk"
           AttributeType: "S"
-
+        - AttributeName: "gsi3_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi3_sk"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
         - AttributeName: "sk"
           KeyType: "RANGE"
-      # ProvisionedThroughput:
-      #   ReadCapacityUnits: 2
-      #   WriteCapacityUnits: 2
       GlobalSecondaryIndexes:
         - IndexName: gsi1
           KeySchema:
@@ -73,7 +73,14 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-
+        - IndexName: gsi3
+          KeySchema:
+            - AttributeName: gsi3_pk
+              KeyType: HASH
+            - AttributeName: gsi3_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
       Tags:
