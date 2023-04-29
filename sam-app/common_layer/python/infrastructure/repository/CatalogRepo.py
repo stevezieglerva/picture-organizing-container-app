@@ -91,8 +91,12 @@ class PictureCatalogRepo(StoringCatalogData):
         self._clock = clock
 
     def add_new_picture_to_catalog(self, picture: Picture) -> PictureCatalogGroup:
+
         return self._convert_picture_to_catalogrecords(
-            picture, self._clock.get_time(), self._clock.get_time()
+            picture,
+            self._clock.get_time(),
+            self._clock.get_time(),
+            "created",
         )
 
     def _convert_picture_to_catalogrecords(
@@ -105,6 +109,7 @@ class PictureCatalogRepo(StoringCatalogData):
         layout = "landscape"
         if picture.height > picture.width:
             layout = "portrait"
+        update_tmsp = date_updated.strftime("%m/%d/%y")
         picture_record = PictureRecord(
             pk=f"PICTURE#{picture.source}",
             sk="-",
@@ -125,5 +130,6 @@ class PictureCatalogRepo(StoringCatalogData):
             month=picture.taken.month,
             day=picture.taken.day,
             model=picture.model,
+            update_desc=f"{update_tmsp}-{new_update_desc}",
         )
         return PictureCatalogGroup(picture=picture_record)

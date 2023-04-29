@@ -104,6 +104,7 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.year, 2023)
         self.assertEqual(results.picture.month, 1)
         self.assertEqual(results.picture.day, 13)
+        self.assertEqual(results.picture.update_desc, "01/02/23-created")
 
 
 if __name__ == "__main__":
