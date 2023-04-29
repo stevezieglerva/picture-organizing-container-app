@@ -29,6 +29,7 @@ class PictureRecord:
     year: int
     month: int
     day: int
+    update_desc: str
     gsi1_pk: str = ""
     gsi1_sk: str = ""
     gsi2_pk: str = ""
@@ -95,7 +96,11 @@ class PictureCatalogRepo(StoringCatalogData):
         )
 
     def _convert_picture_to_catalogrecords(
-        self, picture: Picture, date_added: datetime, date_updated: datetime
+        self,
+        picture: Picture,
+        date_added: datetime,
+        date_updated: datetime,
+        new_update_desc: str,
     ) -> PictureCatalogGroup:
         layout = "landscape"
         if picture.height > picture.width:

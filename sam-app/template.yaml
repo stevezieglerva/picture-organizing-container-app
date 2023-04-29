@@ -76,14 +76,7 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-        - IndexName: gsi3
-          KeySchema:
-            - AttributeName: gsi3_pk
-              KeyType: HASH
-            - AttributeName: gsi3_sk
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
+
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
       Tags:
