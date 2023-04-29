@@ -29,6 +29,23 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.gis_lat, 35.7275917)
         self.assertEqual(results.gis_long, -78.9425722)
 
+    def test_should_get_picture_without_gps(self):
+        # Arrange
+        subject = PictureFileRepo(
+            ImageIOLocal(),
+        )
+
+        # Act
+        results = subject.get_picture_file(
+            "tests/unit/data/picture_files/without_gps.jpg"
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.model, "iPhone XR")
+        self.assertEqual(results.gis_lat, None)
+        self.assertEqual(results.gis_long, None)
+
 
 if __name__ == "__main__":
     unittest.main()

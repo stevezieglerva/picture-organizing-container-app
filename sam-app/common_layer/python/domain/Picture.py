@@ -164,8 +164,8 @@ class Picture:
     orientation: int = None
     model: str = None
     taken: datetime = None
-    gis_lat: float = 0.0
-    gis_long: float = 0.0
+    gis_lat: float = None
+    gis_long: float = None
 
     def __init__(self, source: str, image_io: ImageIO, rotate_on_open: bool = True):
         assert isinstance(
@@ -217,14 +217,15 @@ class Picture:
                 if times:
                     time_str = times[0].replace(".", ":")
                 self.taken = parser.parse(f"{date_str} {time_str}")
-        lat_degrees = self._convert_gis_dms_to_dd(
-            self._exif_image.gps_latitude, self._exif_image.gps_latitude_ref
-        )
-        long_degrees = self._convert_gis_dms_to_dd(
-            self._exif_image.gps_longitude, self._exif_image.gps_longitude_ref
-        )
-        self.gis_lat = round(lat_degrees, 7)
-        self.gis_long = round(long_degrees, 7)
+        if "gps_latitude" in self._exif_image.list_all():
+            lat_degrees = self._convert_gis_dms_to_dd(
+                self._exif_image.gps_latitude, self._exif_image.gps_latitude_ref
+            )
+            long_degrees = self._convert_gis_dms_to_dd(
+                self._exif_image.gps_longitude, self._exif_image.gps_longitude_ref
+            )
+            self.gis_lat = round(lat_degrees, 7)
+            self.gis_long = round(long_degrees, 7)
 
     def __str__(self):
         text = f"""source: {self.source}
