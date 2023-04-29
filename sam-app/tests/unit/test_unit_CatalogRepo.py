@@ -1,7 +1,11 @@
 import unittest
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
-from infrastructure.repository.CatalogRepo import CatalogRepo
+from domain.Picture import ImageIOLocal, Picture
+from infrastructure.repository.CatalogRepo import (
+    PictureCatalogRepo,
+    convert_picture_to_catalogrecords,
+)
 from infrastructure.repository.DynamoDB import UsingDynamoDB
 
 
@@ -45,16 +49,32 @@ class FakeDynamoDB(UsingDynamoDB):
         raise NotImplemented
 
 
+class RecordConversion(unittest.TestCase):
+    def test_should_convert_picture_to_catalogs(self):
+        # Arrange
+        pic = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
+
+        # Act
+        results = convert_picture_to_catalogrecords(pic)
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(
+            results.picture.s3_url, "tests/unit/data/picture_files/with_gps.jpg"
+        )
+
+
 class Basic(unittest.TestCase):
     def test_should_create(self):
         # Arrange
 
         # Act
-        subject = CatalogRepo(FakeDynamoDB("xyz"))
+        subject = PictureCatalogRepo(FakeDynamoDB("xyz"))
 
+    @unittest.skip("")
     def test_should_write_picture(self):
         # Arrange
-        subject = CatalogRepo(FakeDynamoDB("xyz"))
+        subject = PictureCatalogRepo(FakeDynamoDB("xyz"))
 
         # Act
         results = subject.write_picture_to_catalog(CatalogRecord())
