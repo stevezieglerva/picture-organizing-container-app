@@ -14,4 +14,5 @@ class PictureFileRepo(GettingPictureFiles):
         self._image_io = image_io
 
     def get_picture_file(self, source: str) -> Picture:
-        return ""
+        picture = Picture(source, self._image_io)
+        return picture

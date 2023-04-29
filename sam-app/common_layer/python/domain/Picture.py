@@ -14,6 +14,7 @@ import imagehash
 from dateutil import parser
 from exif import Image as ExifImage
 from exif import Orientation
+from GPSPhoto import gpsphoto
 from PIL import Image, ImageOps
 
 
@@ -63,6 +64,28 @@ class ImageIOLocal:
         return Image.open(source)
 
     def save(self, new_path: str, image: Image):
+        path = Path(new_path)
+        extension = path.suffix.lower()
+        print(f"\n\nExtension: {extension}")
+        if extension in [".jpeg", ".jpg"]:
+            format = "JPEG"
+        elif extension in [".png"]:
+            format = "PNG"
+        else:
+            raise InvalidImageExtension(
+                f"{extension} is not valid so can't find valid image format."
+            )
+
+        buffer = BytesIO()
+        current_exif = image.info.get("exif", None)
+        if current_exif == None:
+            print("saving without exif")
+            image.save(buffer, format)
+        else:
+            print("saving with exif")
+            print(current_exif)
+            print(current_exif.gps_latitutude)
+            image.save(buffer, format, exif=current_exif)
         return image.save(new_path)
 
     def get_image_bytes(self, source):
@@ -141,6 +164,8 @@ class Picture:
     orientation: int = None
     model: str = None
     taken: datetime = None
+    gis_lat: float = 0.0
+    gis_long: float = 0.0
 
     def __init__(self, source: str, image_io: ImageIO, rotate_on_open: bool = True):
         assert isinstance(
@@ -192,6 +217,14 @@ class Picture:
                 if times:
                     time_str = times[0].replace(".", ":")
                 self.taken = parser.parse(f"{date_str} {time_str}")
+        lat_degrees = self._convert_gis_dms_to_dd(
+            self._exif_image.gps_latitude, self._exif_image.gps_latitude_ref
+        )
+        long_degrees = self._convert_gis_dms_to_dd(
+            self._exif_image.gps_longitude, self._exif_image.gps_longitude_ref
+        )
+        self.gis_lat = round(lat_degrees, 7)
+        self.gis_long = round(long_degrees, 7)
 
     def __str__(self):
         text = f"""source: {self.source}
@@ -200,8 +233,21 @@ width:       {self.width}
 height:      {self.height}
 aspect:       {round(self.width / self.height, 2)}
 orientation: {self.orientation}
-model:       {self.model}"""
+model:       {self.model}
+lat:         {self.gis_lat}
+long:        {self.gis_long}
+"""
         return text
+
+    def _convert_gis_dms_to_dd(self, gps_coords, gps_coords_ref):
+        d, m, s = gps_coords
+        dd = d + m / 60 + s / 3600
+        if gps_coords_ref.upper() in ("S", "W"):
+            return -dd
+        elif gps_coords_ref.upper() in ("N", "E"):
+            return dd
+        else:
+            raise RuntimeError("Incorrect gps_coords_ref {}".format(gps_coords_ref))
 
     def resize(self, new_path: str, **kwargs):
         width = kwargs.get("width", None)
@@ -257,7 +303,6 @@ model:       {self.model}"""
         return PictureSize(width=ideal_width, height=ideal_height)
 
     def save_as(self, new_path: str):
-
         self.image_io.save(new_path, self._pil_image)
 
     def show(self):
