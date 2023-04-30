@@ -52,7 +52,7 @@ class FakeDynamoDB(UsingDynamoDB):
         raise NotImplemented
 
 
-class Basic(unittest.TestCase):
+class BasicPictureRecord(unittest.TestCase):
     def test_should_create(self):
         # Arrange
 
@@ -114,6 +114,26 @@ class Basic(unittest.TestCase):
         self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
         self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY#01-13")
         self.assertTrue(results.picture.gsi3_sk.startswith("2023-01-13"))
+
+
+class BasicHashRecord(unittest.TestCase):
+    def test_should_add_new_picture_to_catalog_with_gps(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.hashes[0].pk, "HASH")
 
 
 class LastShownCorrect(unittest.TestCase):

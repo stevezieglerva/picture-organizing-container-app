@@ -51,6 +51,10 @@ Resources:
           AttributeType: "S"
         - AttributeName: "gsi3_sk"
           AttributeType: "S"
+        - AttributeName: "gsi4_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi4_sk"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
@@ -78,6 +82,14 @@ Resources:
             - AttributeName: gsi3_pk
               KeyType: HASH
             - AttributeName: gsi3_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: gsi4
+          KeySchema:
+            - AttributeName: gsi4_pk
+              KeyType: HASH
+            - AttributeName: gsi4_sk
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
@@ -109,14 +121,15 @@ Resources:
           AttributeType: "S"
         - AttributeName: "gsi3_sk"
           AttributeType: "S"
+        - AttributeName: "gsi4_pk"
+          AttributeType: "S"
+        - AttributeName: "gsi4_sk"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
         - AttributeName: "sk"
           KeyType: "RANGE"
-      # ProvisionedThroughput:
-      #   ReadCapacityUnits: 2
-      #   WriteCapacityUnits: 2
       GlobalSecondaryIndexes:
         - IndexName: gsi1
           KeySchema:
@@ -139,6 +152,14 @@ Resources:
             - AttributeName: gsi3_pk
               KeyType: HASH
             - AttributeName: gsi3_sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: gsi4
+          KeySchema:
+            - AttributeName: gsi4_pk
+              KeyType: HASH
+            - AttributeName: gsi4_sk
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

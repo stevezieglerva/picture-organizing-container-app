@@ -141,6 +141,35 @@ class PictureCatalogRepo(StoringCatalogData):
         return PictureCatalogGroup(picture=picture_record)
 
 
+# def create_hash_dynamodb_recordset(
+#     hash_type: str,
+#     hash_value: str,
+#     pk: str,
+# ) -> dict:
+#     records = []
+#     print(f"\t\t{hash_type}/{hash_value}")
+#     for i in range(0, int(len(hash_value) / 4)):
+#         hash_value_record = {}
+#         start_index = i * 4
+#         end_index = start_index + 4
+#         hash_section = hash_value[start_index:end_index]
+#         # print(f"\t\t\thash_section: {hash_section}")
+#         hash_value_record["pk"] = f"HASH_VALUE_{hash_type}_{i+1}#" + hash_section
+#         hash_value_record["sk"] = pk
+#         hash_value_record["hash_type"] = hash_type
+#         hash_value_record["hash_value"] = hash_value
+#         hash_value_record["original_picture_pk"] = pk
+#         records.append(hash_value_record)
+#     return records
+@dataclass(frozen=True)
+class HashRecord:
+    pk: str
+    sk: str
+    hash_type: str
+    hash_value: str
+    s3_url: str
+
+
 # {
 #  "pk": "ORIGINAL_PICTURE#original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
 #  "sk": "-",
