@@ -133,7 +133,8 @@ class BasicHashRecord(unittest.TestCase):
         print(f"test results: {results}")
 
         # Assert
-        self.assertEqual(results.hashes[0].pk, "HASH")
+        self.assertEqual(results.hashes[0].pk, "HASH_average_1#0000")
+        self.assertEqual(results.hashes[0].sk, "HASH")
 
 
 class LastShownCorrect(unittest.TestCase):
