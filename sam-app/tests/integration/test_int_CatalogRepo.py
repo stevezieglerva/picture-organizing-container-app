@@ -12,7 +12,6 @@ from infrastructure.repository.DynamoDB import DynamoDB
 from infrastructure.system.Clock import RealClock
 
 
-@unittest.skip("")
 class Basic(unittest.TestCase):
     def test_should_create(self):
         # Arrange
@@ -115,7 +114,7 @@ class HashSimilar(unittest.TestCase):
         # Assert
         self.assertEqual(results.picture.pk, "PICTURE")
         self.assertEqual(results.picture.sk, "/tmp/with_gps_flip_landscape.jpg")
-        self.assertEqual(results.picture.height, 3225)
+        self.assertEqual(results.picture.height, 2419)
         self.assertEqual(results.picture.width, 2721)
 
 

@@ -39,6 +39,10 @@ class PictureRecord:
     gsi2_sk: str = "-"
     gsi3_pk: str = "-"
     gsi3_sk: str = "-"
+    gsi4_pk: str = "-"
+    gsi4_sk: str = "-"
+    gsi5_pk: str = "-"
+    gsi5_sk: str = "-"
     gis_lat: float = -1
     gis_long: float = -1
     last_shown: datetime = datetime(1900, 1, 1, 1, 1, 1)
@@ -116,6 +120,10 @@ class PictureCatalogRepo(StoringCatalogData):
             gsi2_sk=f"{date_added.isoformat()}",
             gsi3_pk=f"ON_THIS_DAY#{on_this_day}",
             gsi3_sk=f"{picture.taken.isoformat()}",
+            gsi4_pk="UNIQUE_HASH",
+            gsi4_sk=str(picture.hash_unique),
+            gsi5_pk="DATE_TAKEN",
+            gsi5_sk=picture.taken.isoformat(),
             ulid=str(ULID()),
             s3_url=picture.source,
             date_taken=picture.taken,

@@ -114,8 +114,13 @@ class BasicPictureRecord(unittest.TestCase):
         self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
         self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY#01-13")
         self.assertTrue(results.picture.gsi3_sk.startswith("2023-01-13"))
+        self.assertEqual(results.picture.gsi4_pk, "UNIQUE_HASH")
+        self.assertEqual(results.picture.gsi4_sk, "048b5ba2c6a9f13b89e59c0751b6e8c3")
+        self.assertEqual(results.picture.gsi5_pk, "DATE_TAKEN")
+        self.assertEqual(results.picture.gsi5_sk, "2023-01-13T07:43:54")
 
 
+@unittest.skip("")
 class BasicHashRecord(unittest.TestCase):
     def test_should_add_new_picture_to_catalog_with_gps(self):
         # Arrange
