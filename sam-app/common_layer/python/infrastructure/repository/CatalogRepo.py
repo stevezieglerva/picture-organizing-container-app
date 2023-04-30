@@ -2,7 +2,7 @@ import json
 import random
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from domain import Picture
 from domain.Picture import Picture
@@ -32,6 +32,7 @@ class PictureRecord:
     month: int
     day: int
     update_desc: str
+    last_shown = datetime
     gsi1_pk: str = "-"
     gsi1_sk: str = "-"
     gsi2_pk: str = "-"
@@ -94,12 +95,23 @@ class PictureCatalogRepo(StoringCatalogData):
         if picture.gis_long != None:
             gis_long = picture.gis_long
         random_shown = random.randint(1, 100)
+
+        last_shown_pk = "NEVER_SHOW"
+        last_shown_date = datetime(1900, 1, 1)
+        last_shown_sk = "-"
+        if "original" in picture.source:
+            last_shown_pk = f"LAST_SHOWN#{layout}"
+            last_shown_date = date_added - timedelta(days=1)
+            last_shown_sk = f"{last_shown_date.strftime('%Y-%m-%d')}_{random_shown}"
+
         on_this_day = picture.taken.strftime("%m-%d")
+
         picture_record = PictureRecord(
-            pk=f"PICTURE#{picture.source}",
-            sk="-",
-            gsi1_pk=f"LAST_SHOWN#{layout}",
-            gsi1_sk=f"{date_updated.strftime('%Y-%m-%d')}_{random_shown}",
+            pk=f"PICTURE",
+            sk=picture.source,
+            # only shown if original
+            gsi1_pk=last_shown_pk,
+            gsi1_sk=last_shown_sk,
             gsi2_pk=f"DATE_ADDED#{layout}",
             gsi2_sk=f"{date_added.isoformat()}",
             gsi3_pk=f"ON_THIS_DAY#{on_this_day}",
@@ -124,6 +136,7 @@ class PictureCatalogRepo(StoringCatalogData):
             update_desc=f"{update_tmsp}-{new_update_desc}",
             gis_lat=gis_lat,
             gis_long=gis_long,
+            last_shown=last_shown_date,
         )
         return PictureCatalogGroup(picture=picture_record)
 

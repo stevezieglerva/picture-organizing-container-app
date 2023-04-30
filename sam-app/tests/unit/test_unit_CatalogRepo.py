@@ -78,10 +78,10 @@ class Basic(unittest.TestCase):
         print(f"test results: {results}")
 
         # Assert
+        self.assertEqual(results.picture.pk, "PICTURE")
         self.assertEqual(
-            results.picture.pk, "PICTURE#tests/unit/data/picture_files/with_gps.jpg"
+            results.picture.sk, "tests/unit/data/picture_files/with_gps.jpg"
         )
-        self.assertEqual(results.picture.sk, "-")
         self.assertTrue(results.picture.ulid != "")
         self.assertEqual(
             results.picture.s3_url, "tests/unit/data/picture_files/with_gps.jpg"
@@ -108,12 +108,56 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.update_desc, "01/02/23-created")
         self.assertEqual(results.picture.gis_lat, 35.7275917)
         self.assertEqual(results.picture.gis_long, -78.9425722)
-        self.assertEqual(results.picture.gsi1_pk, "LAST_SHOWN#portrait")
-        self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-02"))
+        self.assertEqual(results.picture.gsi1_pk, "NEVER_SHOW")
+        self.assertEqual(results.picture.gsi1_sk, "-")
         self.assertEqual(results.picture.gsi2_pk, "DATE_ADDED#portrait")
         self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
         self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY#01-13")
         self.assertTrue(results.picture.gsi3_sk.startswith("2023-01-13"))
+
+
+class LastShownCorrect(unittest.TestCase):
+    def test_should_not_use_last_shown_since_not_original(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.picture.last_shown, datetime(1900, 1, 1))
+        self.assertEqual(results.picture.gsi1_pk, "NEVER_SHOW")
+        self.assertTrue(results.picture.gsi1_sk.startswith("-"))
+
+    def test_should_use_last_shown_since_original(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        picture = Picture(
+            "tests/unit/data/picture_files/original/with_gps.jpg", ImageIOLocal()
+        )
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.picture.last_shown.year, 2023)
+        self.assertEqual(results.picture.gsi1_pk, "LAST_SHOWN#portrait")
+        self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-01"))
 
 
 if __name__ == "__main__":

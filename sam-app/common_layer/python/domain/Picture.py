@@ -296,7 +296,32 @@ long:        {self.gis_long}
         print(
             f"Resized aspect: {self.width}W x {self.height}H -> {ideal_width}W x {ideal_height}H"
         )
+        return PictureSize(width=ideal_width, height=ideal_height)
 
+    def crop(self, new_path, one, two, three, four):
+        aspect = self.width / float(self.height)
+        print(f"aspect: {aspect}")
+        ideal_aspect = ideal_width / float(ideal_height)
+        print(f"ideal_aspect: {ideal_aspect}")
+
+        if aspect > ideal_aspect:
+            # Then crop the left and right edges:
+            new_width = int(ideal_aspect * self.height)
+            offset = (self.width - new_width) / 2
+            resize = (offset, 0, self.width - offset, self.height)
+        else:
+            # ... crop the top and bottom:
+            new_height = int(self.width / ideal_aspect)
+            offset = (self.height - new_height) / 2
+            resize = (0, offset, self.width, self.height - offset)
+
+        cropped_resized_image = self._pil_image.crop(resize).resize(
+            (ideal_width, ideal_height), Image.ANTIALIAS
+        )
+        self.image_io.save(new_path, cropped_resized_image)
+        print(
+            f"Resized aspect: {self.width}W x {self.height}H -> {ideal_width}W x {ideal_height}H"
+        )
         return PictureSize(width=ideal_width, height=ideal_height)
 
     def save_as(self, new_path: str):
