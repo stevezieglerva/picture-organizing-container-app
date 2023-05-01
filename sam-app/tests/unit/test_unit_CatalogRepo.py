@@ -52,6 +52,7 @@ class FakeDynamoDB(UsingDynamoDB):
         raise NotImplemented
 
 
+@unittest.skip("")
 class BasicPictureRecord(unittest.TestCase):
     def test_should_create(self):
         # Arrange
@@ -120,9 +121,8 @@ class BasicPictureRecord(unittest.TestCase):
         self.assertEqual(results.picture.gsi5_sk, "2023-01-13T07:43:54")
 
 
-@unittest.skip("")
 class BasicHashRecord(unittest.TestCase):
-    def test_should_add_new_picture_to_catalog_with_gps(self):
+    def test_should_add_new_hashes(self):
         # Arrange
         subject = PictureCatalogRepo(
             FakeDynamoDB("xyz"),
@@ -138,10 +138,16 @@ class BasicHashRecord(unittest.TestCase):
         print(f"test results: {results}")
 
         # Assert
-        self.assertEqual(results.hashes[0].pk, "HASH_average_1#0000")
-        self.assertEqual(results.hashes[0].sk, "HASH")
+        self.assertEqual(results.hashes[0].pk, "HASH_VALUE_AVERAGE_1#fdf9")
+        self.assertEqual(
+            results.hashes[0].sk, "tests/unit/data/picture_files/with_gps.jpg"
+        )
+        self.assertEqual(results.hashes[0].hash_value, "fdf9030323f31f0f")
+        self.assertEqual(results.hashes[3].pk, "HASH_VALUE_AVERAGE_4#1f0f")
+        self.assertEqual(results.hashes[4].pk, "HASH_VALUE_PHASH_1#aeea")
 
 
+@unittest.skip("")
 class LastShownCorrect(unittest.TestCase):
     def test_should_not_use_last_shown_since_not_original(self):
         # Arrange

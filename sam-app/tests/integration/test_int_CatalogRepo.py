@@ -42,6 +42,46 @@ class Basic(unittest.TestCase):
             results.picture.sk, "tests/unit/data/picture_files/with_gps.jpg"
         )
 
+    def test_should_add_s3_sample_1(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+        picture = Picture(
+            "svz-master-pictures-new/original/2023/2023-04-09_Pictures_On_Easter_at_Sierra_Glen_2023-04-09_19.29.23.jpeg",
+            ImageIOS3(),
+        )
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+
+    #
+
+    def test_should_add_s3_sample_2(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+        picture = Picture(
+            "svz-master-pictures-new/original/2023/2023-04-09_Pictures_On_Easter_at_Sierra_Glen_2023-04-09_19.29.31.jpeg",
+            ImageIOS3(),
+        )
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+
 
 class HashSimilar(unittest.TestCase):
     def test_should_add_new_resized_with_correct_gps_and_hashes(self):

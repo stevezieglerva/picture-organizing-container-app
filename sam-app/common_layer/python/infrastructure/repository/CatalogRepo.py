@@ -3,6 +3,7 @@ import random
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
+from typing import List
 
 from domain import Picture
 from domain.Picture import Picture
@@ -50,8 +51,18 @@ class PictureRecord:
 
 
 @dataclass(frozen=True)
+class HashRecord:
+    pk: str
+    sk: str
+    hash_type: str
+    hash_value: str
+    s3_url: str
+
+
+@dataclass(frozen=True)
 class PictureCatalogGroup:
     picture: PictureRecord
+    hashes: List[HashRecord]
 
 
 class StoringCatalogData(ABC):
@@ -146,36 +157,39 @@ class PictureCatalogRepo(StoringCatalogData):
             gis_long=gis_long,
             last_shown=last_shown_date,
         )
-        return PictureCatalogGroup(picture=picture_record)
+        hashes = self._create_hash_dynamodb_recordset(
+            "AVERAGE", str(picture.hash_average_hash), picture.source
+        )
+        hashes.extend(
+            self._create_hash_dynamodb_recordset(
+                "PHASH", str(picture.hash_phash), picture.source
+            )
+        )
+        return PictureCatalogGroup(picture=picture_record, hashes=hashes)
 
-
-# def create_hash_dynamodb_recordset(
-#     hash_type: str,
-#     hash_value: str,
-#     pk: str,
-# ) -> dict:
-#     records = []
-#     print(f"\t\t{hash_type}/{hash_value}")
-#     for i in range(0, int(len(hash_value) / 4)):
-#         hash_value_record = {}
-#         start_index = i * 4
-#         end_index = start_index + 4
-#         hash_section = hash_value[start_index:end_index]
-#         # print(f"\t\t\thash_section: {hash_section}")
-#         hash_value_record["pk"] = f"HASH_VALUE_{hash_type}_{i+1}#" + hash_section
-#         hash_value_record["sk"] = pk
-#         hash_value_record["hash_type"] = hash_type
-#         hash_value_record["hash_value"] = hash_value
-#         hash_value_record["original_picture_pk"] = pk
-#         records.append(hash_value_record)
-#     return records
-@dataclass(frozen=True)
-class HashRecord:
-    pk: str
-    sk: str
-    hash_type: str
-    hash_value: str
-    s3_url: str
+    def _create_hash_dynamodb_recordset(
+        self,
+        hash_type: str,
+        hash_value: str,
+        s3_url: str,
+    ) -> dict:
+        records = []
+        print(f"\t\t{hash_type}/{hash_value}")
+        for i in range(0, int(len(hash_value) / 4)):
+            start_index = i * 4
+            end_index = start_index + 4
+            hash_section = hash_value[start_index:end_index]
+            # print(f"\t\t\thash_section: {hash_section}")
+            pk = f"HASH_VALUE_{hash_type}_{i+1}#" + hash_section
+            hash_record = HashRecord(
+                pk=pk,
+                sk=s3_url,
+                hash_type=hash_type,
+                hash_value=hash_value,
+                s3_url=s3_url,
+            )
+            records.append(hash_record)
+        return records
 
 
 # {
