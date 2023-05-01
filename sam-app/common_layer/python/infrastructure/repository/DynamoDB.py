@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from time import time
 
 import boto3
+from retry import retry
 
 
 class RecordNotFound(Exception):
@@ -137,6 +138,7 @@ class DynamoDB(UsingDynamoDB):
         key_schema = table_resp["Table"]["KeySchema"]
         self.key_fields = [k["AttributeName"] for k in key_schema]
 
+    @retry(tries=3, backoff=1)
     def put_item(self, record) -> None:
         assert type(record) == dict, "record parameter needs to a dict"
         if self._ttl != None:
@@ -156,6 +158,7 @@ class DynamoDB(UsingDynamoDB):
             converted_results.append(self.convert_from_dict_format(item))
         return converted_results
 
+    @retry(tries=3, backoff=1)
     def get_item(self, key) -> dict:
         assert type(key) == dict, "Expecting key to be of type dict"
         db_format = self.convert_to_dynamodb_format(key)
@@ -166,12 +169,14 @@ class DynamoDB(UsingDynamoDB):
         results = self.convert_from_dynamodb_format(db_record)
         return results
 
+    @retry(tries=3, backoff=1)
     def delete_item(self, key) -> None:
         assert type(key) == dict, "Expecting key to be of type dict"
         db_format = self.convert_to_dynamodb_format(key)
         # print(f"Deleting: {db_format}")
         db_record = self._db.delete_item(TableName=self.table_name, Key=db_format)
 
+    @retry(tries=3, backoff=1)
     def query_table_equal(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> dict:
@@ -187,6 +192,7 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
+    @retry(tries=3, backoff=1)
     def query_table_greater_than(
         self, key, index_name="", scan_index_forward: bool = True
     ):
@@ -205,6 +211,7 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
+    @retry(tries=3, backoff=1)
     def query_table_begins(self, key, index_name="", scan_index_forward: bool = True):
         key_names = list(key.keys())
         if len(key_names) == 1:
@@ -219,6 +226,7 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
+    @retry(tries=3, backoff=1)
     def query_table_between(self, key, index_name="", scan_index_forward: bool = True):
         key_names = list(key.keys())
         assert len(key_names) == 2, f"Expected key to have the pk and sk: {key}"
@@ -234,9 +242,11 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
+    @retry(tries=3, backoff=1)
     def query_index_begins(self, index_name, key):
         return self.query_table_begins(key, index_name)
 
+    @retry(tries=3, backoff=1)
     def scan_full(self):
         scan_results = self._db.scan(TableName=self.table_name)
         return self.convert_list_from_dynamodb_format(scan_results)

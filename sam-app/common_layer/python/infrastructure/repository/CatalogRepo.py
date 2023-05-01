@@ -90,6 +90,12 @@ class PictureCatalogRepo(StoringCatalogData):
         picture_json = asdict(records.picture)
         print(f"Adding picture: {json.dumps(picture_json, indent=3, default=str)}")
         self._db.put_item(picture_json)
+        print(f"Adding hashes:")
+        for hash in records.hashes:
+            print(f"\tAdding: {hash.pk}")
+            hash_json = asdict(hash)
+            self._db.put_item(hash_json)
+
         return records
 
     def _convert_picture_to_catalogrecords(
