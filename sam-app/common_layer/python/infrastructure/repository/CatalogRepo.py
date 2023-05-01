@@ -56,6 +56,14 @@ class HashRecord:
     sk: str
     hash_type: str
     hash_value: str
+    gsi1_pk: str
+    gsi1_sk: str
+    gsi2_pk: str
+    gsi2_sk: str
+    gsi3_pk: str
+    gsi3_sk: str
+    gsi4_pk: str
+    gsi4_sk: str
     s3_url: str
 
 
@@ -163,10 +171,12 @@ class PictureCatalogRepo(StoringCatalogData):
             gis_long=gis_long,
             last_shown=last_shown_date,
         )
-        hashes = self._create_hash_dynamodb_recordset(
-            "AVERAGE", str(picture.hash_average_hash), picture.source
-        )
-        hashes.extend(
+        hashes = [
+            self._create_hash_dynamodb_recordset(
+                "AVERAGE_HASH", str(picture.hash_average_hash), picture.source
+            )
+        ]
+        hashes.append(
             self._create_hash_dynamodb_recordset(
                 "PHASH", str(picture.hash_phash), picture.source
             )
@@ -181,21 +191,24 @@ class PictureCatalogRepo(StoringCatalogData):
     ) -> dict:
         records = []
         print(f"\t\t{hash_type}/{hash_value}")
-        for i in range(0, int(len(hash_value) / 4)):
-            start_index = i * 4
-            end_index = start_index + 4
-            hash_section = hash_value[start_index:end_index]
-            # print(f"\t\t\thash_section: {hash_section}")
-            pk = f"HASH_VALUE_{hash_type}_{i+1}#" + hash_section
-            hash_record = HashRecord(
-                pk=pk,
-                sk=s3_url,
-                hash_type=hash_type,
-                hash_value=hash_value,
-                s3_url=s3_url,
-            )
-            records.append(hash_record)
-        return records
+
+        hash_record = HashRecord(
+            pk=f"HASH_{hash_type}",
+            sk=s3_url,
+            hash_type=hash_type,
+            hash_value=hash_value,
+            s3_url=s3_url,
+            gsi1_pk=f"{hash_type}_1",
+            gsi1_sk=hash_value[0:4],
+            gsi2_pk=f"{hash_type}_2",
+            gsi2_sk=hash_value[4:8],
+            gsi3_pk=f"{hash_type}_3",
+            gsi3_sk=hash_value[8:12],
+            gsi4_pk=f"{hash_type}_4",
+            gsi4_sk=hash_value[12:],
+        )
+
+        return hash_record
 
 
 # {

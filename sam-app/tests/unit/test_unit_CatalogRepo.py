@@ -139,16 +139,26 @@ class BasicHashRecord(unittest.TestCase):
 
         # Assert
         self.assertEqual(len(results.hashes), 2)
-        self.assertEqual(results.hashes[0].pk, "HASH_AVERAGE_HASH_1#fdf9")
+        self.assertEqual(results.hashes[0].pk, "HASH_AVERAGE_HASH")
         self.assertEqual(
             results.hashes[0].sk, "tests/unit/data/picture_files/with_gps.jpg"
         )
         self.assertEqual(results.hashes[0].gsi1_pk, "AVERAGE_HASH_1")
         self.assertEqual(results.hashes[0].gsi1_sk, "fdf9")
+        self.assertEqual(results.hashes[0].gsi2_pk, "AVERAGE_HASH_2")
+        self.assertEqual(results.hashes[0].gsi2_sk, "0303")
+        self.assertEqual(results.hashes[0].gsi3_pk, "AVERAGE_HASH_3")
+        self.assertEqual(results.hashes[0].gsi3_sk, "23f3")
+        self.assertEqual(results.hashes[0].gsi4_pk, "AVERAGE_HASH_4")
+        self.assertEqual(results.hashes[0].gsi4_sk, "1f0f")
         self.assertEqual(results.hashes[0].hash_value, "fdf9030323f31f0f")
 
-        self.assertEqual(results.hashes[3].pk, "HASH_VALUE_AVERAGE_4#1f0f")
-        self.assertEqual(results.hashes[4].pk, "HASH_VALUE_PHASH_1#aeea")
+        self.assertEqual(results.hashes[1].pk, "HASH_PHASH")
+        self.assertEqual(
+            results.hashes[1].sk, "tests/unit/data/picture_files/with_gps.jpg"
+        )
+        self.assertEqual(results.hashes[1].gsi1_pk, "PHASH_1")
+        self.assertEqual(results.hashes[1].gsi1_sk, "aeea")
 
 
 @unittest.skip("")
