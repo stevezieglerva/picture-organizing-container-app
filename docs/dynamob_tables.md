@@ -1,6 +1,3 @@
-# picture-organizing-container-app
-
-
 ## Table: PICTURE
 | pk  |  sk  |  gsi1_pk  |  gsi1_sk  |  s3_url |
 |--|--|--|--|--|

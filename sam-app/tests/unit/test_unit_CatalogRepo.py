@@ -138,11 +138,15 @@ class BasicHashRecord(unittest.TestCase):
         print(f"test results: {results}")
 
         # Assert
-        self.assertEqual(results.hashes[0].pk, "HASH_VALUE_AVERAGE_1#fdf9")
+        self.assertEqual(len(results.hashes), 2)
+        self.assertEqual(results.hashes[0].pk, "HASH_AVERAGE_HASH_1#fdf9")
         self.assertEqual(
             results.hashes[0].sk, "tests/unit/data/picture_files/with_gps.jpg"
         )
+        self.assertEqual(results.hashes[0].gsi1_pk, "AVERAGE_HASH_1")
+        self.assertEqual(results.hashes[0].gsi1_sk, "fdf9")
         self.assertEqual(results.hashes[0].hash_value, "fdf9030323f31f0f")
+
         self.assertEqual(results.hashes[3].pk, "HASH_VALUE_AVERAGE_4#1f0f")
         self.assertEqual(results.hashes[4].pk, "HASH_VALUE_PHASH_1#aeea")
 
