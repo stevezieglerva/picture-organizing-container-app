@@ -1,10 +1,17 @@
 import json
 from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from time import time
 
 import boto3
 from retry import retry
+
+
+@dataclass(frozen=True)
+class BatchResults:
+    batches_sent: int
+    batch_results: list
 
 
 class RecordNotFound(Exception):
@@ -58,6 +65,10 @@ class UsingDynamoDB(ABC):
 
     @abstractmethod
     def scan_full(self) -> list:
+        raise NotImplemented
+
+    @retry(tries=3, backoff=1)
+    def put_batch(self, records: list) -> dict:
         raise NotImplemented
 
     def _set_key_fields(self):
@@ -308,3 +319,98 @@ class DynamoDB(UsingDynamoDB):
             )
         results = self.convert_list_from_dynamodb_format(query_response)
         return results
+
+    @retry(tries=3, backoff=1)
+    def put_batch(self, records: list, batch_size: int = 25) -> dict:
+        count = 0
+        all_results = []
+        for chunk in divide_chunks(records, batch_size):
+            count += 1
+            print(f"Processing chunk #{count}")
+            formatted_records = [self.convert_to_dynamodb_format(r) for r in records]
+            formatted_requests = [
+                {"PutRequest": {"Item": r}} for r in formatted_records
+            ]
+            request = {self.table_name: formatted_requests}
+            print(json.dumps(request, indent=3, default=str))
+            resp = self._db.batch_write_item(RequestItems=request)
+            all_results.append(resp)
+        return BatchResults(batches_sent=count, batch_results=all_results)
+
+    @retry(tries=3, backoff=1)
+    def delete_batch(self, records: list, batch_size: int = 25) -> dict:
+        count = 0
+        all_results = []
+        for chunk in divide_chunks(records, batch_size):
+            count += 1
+            print(f"Processing chunk #{count}")
+            formatted_records = [self.convert_to_dynamodb_format(r) for r in chunk]
+            print(formatted_records)
+            print(json.dumps(formatted_records, indent=3, default=str))
+            formatted_requests = [
+                {"DeleteRequest": {"Key": r}} for r in formatted_records
+            ]
+            request = {self.table_name: formatted_requests}
+            print(json.dumps(request, indent=3, default=str))
+            resp = self._db.batch_write_item(RequestItems=request)
+            all_results.append(resp)
+        return BatchResults(batches_sent=count, batch_results=all_results)
+
+
+def divide_chunks(l, n):
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i : i + n]
+
+
+# (
+#             {
+#                 "Music": [
+#                     {
+#                         "PutRequest": {
+#                             "Item": {
+#                                 "AlbumTitle": {
+#                                     "S": "Somewhat Famous",
+#                                 },
+#                                 "Artist": {
+#                                     "S": "No One You Know",
+#                                 },
+#                                 "SongTitle": {
+#                                     "S": "Call Me Today",
+#                                 },
+#                             },
+#                         },
+#                     },
+#                     {
+#                         "PutRequest": {
+#                             "Item": {
+#                                 "AlbumTitle": {
+#                                     "S": "Songs About Life",
+#                                 },
+#                                 "Artist": {
+#                                     "S": "Acme Band",
+#                                 },
+#                                 "SongTitle": {
+#                                     "S": "Happy Day",
+#                                 },
+#                             },
+#                         },
+#                     },
+#                     {
+#                         "PutRequest": {
+#                             "Item": {
+#                                 "AlbumTitle": {
+#                                     "S": "Blue Sky Blues",
+#                                 },
+#                                 "Artist": {
+#                                     "S": "No One You Know",
+#                                 },
+#                                 "SongTitle": {
+#                                     "S": "Scared of My Shadow",
+#                                 },
+#                             },
+#                         },
+#                     },
+#                 ],
+#             },
+#         )
