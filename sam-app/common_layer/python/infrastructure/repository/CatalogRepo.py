@@ -73,6 +73,14 @@ class PictureCatalogGroup:
     hashes: List[HashRecord]
 
 
+@dataclass(frozen=True)
+class GISRecord:
+    lat: float
+    long: float
+    city: str
+    state: str
+
+
 class StoringCatalogData(ABC):
     @abstractmethod
     def __init__(self, db: UsingDynamoDB):
@@ -81,6 +89,9 @@ class StoringCatalogData(ABC):
     @abstractmethod
     def add_new_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
         raise NotImplemented
+
+    def get_gis_by_state(state_id: str) -> List[GISRecord]:
+        pass
 
 
 class PictureCatalogRepo(StoringCatalogData):
@@ -210,30 +221,11 @@ class PictureCatalogRepo(StoringCatalogData):
 
         return hash_record
 
-
-# {
-#  "pk": "ORIGINAL_PICTURE#original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
-#  "sk": "-",
-#  "date_added": "2020-01-05T14:04:27.546226",
-#  "date_taken": "2016-06-28",
-#  "date_updated": "2023-04-24T10:31:35.978645",
-#  "day": 28,
-#  "gsi1_pk": "LAST_SHOWN#landscape",
-#  "gsi1_sk": "2023-04-24_81",
-#  "gsi2_pk": "DATE_ADDED#landscape",
-#  "gsi2_sk": "2020-01-05T14:04:27.546226",
-#  "hash_average_hash": "030078e0c0f4feff",
-#  "hash_crop_resistant": "0706061e3ab2c24b,b2e3090984346030,06baf24b28099430",
-#  "hash_phash": "f9298474f2c7c2c9",
-#  "hash_unique": "1f4550fc769debc4023299205427e6ef",
-#  "height": 3456,
-#  "last_shown": "2023-04-24T00:32:23.502142",
-#  "layout": "landscape",
-#  "month": 6,
-#  "random": 0,
-#  "s3_url": "original/2016/2016_06_28_Omni_Homestead_2016_06_28_999_10_-_Copy.JPG",
-#  "s3_url_lower": "original/2016/2016_06_28_omni_homestead_2016_06_28_999_10_-_copy.jpg",
-#  "view_count": 3,
-#  "width": 5184,
-#  "year": 2016
-# }
+    def get_gis_data_by_state(self, state_id: str) -> List[GISRecord]:
+        results = self._db.query_table_equal(
+            {"gsi2_pk": "STATE", "gsi2_sk": state_id}, "gsi2"
+        )
+        return [
+            GISRecord(lat=r["lat"], long=r["lng"], city=r["city"], state=r["state_id"])
+            for r in results
+        ]

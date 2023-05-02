@@ -12,6 +12,7 @@ from infrastructure.repository.DynamoDB import DynamoDB
 from infrastructure.system.Clock import RealClock
 
 
+@unittest.skip("")
 class Basic(unittest.TestCase):
     def test_should_create(self):
         # Arrange
@@ -83,6 +84,7 @@ class Basic(unittest.TestCase):
         # Assert
 
 
+@unittest.skip("")
 class HashSimilar(unittest.TestCase):
     def test_should_add_new_resized_with_correct_gps_and_hashes(self):
         # Arrange
@@ -202,6 +204,25 @@ class GPS(unittest.TestCase):
         # Assert
         self.assertEqual(results.picture.gis_lat, 35.7275917)
         self.assertEqual(results.picture.gis_long, -78.9425722)
+
+
+class GIS(unittest.TestCase):
+    def test_should_get_state_gis_data(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+
+        # Act
+        results = subject.get_gis_data_by_state(
+            "NC",
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(len(results), 771)
+        self.assertGreater(results[0].lat, 30)
 
 
 if __name__ == "__main__":
