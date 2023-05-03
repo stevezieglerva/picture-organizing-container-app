@@ -187,10 +187,10 @@ class DynamoDB(UsingDynamoDB):
         # print(f"Deleting: {db_format}")
         db_record = self._db.delete_item(TableName=self.table_name, Key=db_format)
 
-    @retry(tries=3, backoff=1)
     def query_table_equal(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> dict:
+        print(f"calling query_table_equal: {datetime.now()}")
         expression_names_mapping = {}
         for count, key_name in enumerate(key.keys()):
             expression_names_mapping[key_name] = f"#{key_name}"
@@ -203,7 +203,6 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
-    @retry(tries=3, backoff=1)
     def query_table_greater_than(
         self, key, index_name="", scan_index_forward: bool = True
     ):
@@ -222,7 +221,6 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
-    @retry(tries=3, backoff=1)
     def query_table_begins(self, key, index_name="", scan_index_forward: bool = True):
         key_names = list(key.keys())
         if len(key_names) == 1:
@@ -237,7 +235,6 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
-    @retry(tries=3, backoff=1)
     def query_table_between(self, key, index_name="", scan_index_forward: bool = True):
         key_names = list(key.keys())
         assert len(key_names) == 2, f"Expected key to have the pk and sk: {key}"
@@ -253,18 +250,18 @@ class DynamoDB(UsingDynamoDB):
             key, key_condition_exp, index_name, scan_index_forward
         )
 
-    @retry(tries=3, backoff=1)
     def query_index_begins(self, index_name, key):
         return self.query_table_begins(key, index_name)
 
-    @retry(tries=3, backoff=1)
     def scan_full(self):
         scan_results = self._db.scan(TableName=self.table_name)
         return self.convert_list_from_dynamodb_format(scan_results)
 
     def _query_table_by_operator(
-        self, key, key_condition_exp, index_name="", scan_index_forward: bool = True
+        self, key_arg, key_condition_exp, index_name="", scan_index_forward: bool = True
     ):
+        key = key_arg.copy()
+        # print(f"\ncalling _query_table_by_operator: {datetime.now()}")
         assert type(key) == dict, "Expecting key to be of type dict"
         exp_attribute_values = key
         original_key_list = list(key.keys())
@@ -298,25 +295,29 @@ class DynamoDB(UsingDynamoDB):
             f"{expression_names_mapping[n]}": f"{n}" for n in expression_names_mapping
         }
         print(f"exp_attribute_names: {exp_attribute_names}")
-        if index_name == "":
-            query_response = self._db.query(
-                TableName=self.table_name,
-                KeyConditionExpression=key_condition_exp,
-                ExpressionAttributeValues=exp_attribute_values_db_format,
-                ExpressionAttributeNames=exp_attribute_names,
-                Limit=self.limit,
-                ScanIndexForward=scan_index_forward,
-            )
-        else:
-            query_response = self._db.query(
-                TableName=self.table_name,
-                IndexName=index_name,
-                KeyConditionExpression=key_condition_exp,
-                ExpressionAttributeValues=exp_attribute_values_db_format,
-                ExpressionAttributeNames=exp_attribute_names,
-                Limit=self.limit,
-                ScanIndexForward=scan_index_forward,
-            )
+        try:
+            if index_name == "":
+                query_response = self._db.query(
+                    TableName=self.table_name,
+                    KeyConditionExpression=key_condition_exp,
+                    ExpressionAttributeValues=exp_attribute_values_db_format,
+                    ExpressionAttributeNames=exp_attribute_names,
+                    Limit=self.limit,
+                    ScanIndexForward=scan_index_forward,
+                )
+            else:
+                query_response = self._db.query(
+                    TableName=self.table_name,
+                    IndexName=index_name,
+                    KeyConditionExpression=key_condition_exp,
+                    ExpressionAttributeValues=exp_attribute_values_db_format,
+                    ExpressionAttributeNames=exp_attribute_names,
+                    Limit=self.limit,
+                    ScanIndexForward=scan_index_forward,
+                )
+        except Exception as e:
+            print(f"Exception trying to query DynamoDB: {e}")
+            raise e
         results = self.convert_list_from_dynamodb_format(query_response)
         return results
 

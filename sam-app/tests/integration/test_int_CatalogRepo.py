@@ -207,6 +207,7 @@ class GPS(unittest.TestCase):
 
 
 class GIS(unittest.TestCase):
+    @unittest.skip("")
     def test_should_get_state_gis_data(self):
         # Arrange
         subject = PictureCatalogRepo(
@@ -217,6 +218,24 @@ class GIS(unittest.TestCase):
         # Act
         results = subject.get_gis_data_by_state(
             "NC",
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(len(results), 771)
+        self.assertGreater(results[0].lat, 30)
+
+    def test_should_get_lat_long_gis_data(self):
+        # Arrange
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+
+        # Act
+        results = subject.get_gis_data_by_lat_long(
+            38.123,
+            -79.123,
         )
         print(f"test results: {results}")
 

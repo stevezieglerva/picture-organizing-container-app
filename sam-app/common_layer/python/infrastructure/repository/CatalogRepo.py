@@ -229,3 +229,12 @@ class PictureCatalogRepo(StoringCatalogData):
             GISRecord(lat=r["lat"], long=r["lng"], city=r["city"], state=r["state_id"])
             for r in results
         ]
+
+    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISRecord]:
+        results = self._db.query_table_equal(
+            {"pk": "GIS_CITY", "sk": 0},
+        )
+        return [
+            GISRecord(lat=r["lat"], long=r["lng"], city=r["city"], state=r["state_id"])
+            for r in results
+        ]
