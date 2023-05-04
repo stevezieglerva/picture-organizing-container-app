@@ -28,7 +28,6 @@ class FakeCatalog(StoringCatalogData):
 
 
 class Basics(unittest.TestCase):
-    @unittest.skip("")
     def test_should_find_city_in_the_cache(self):
         # Arrange
         cache = [
@@ -38,13 +37,13 @@ class Basics(unittest.TestCase):
         subject = GeoLocator(FakeCatalog("test-table"), cache)
 
         # Act
-        results = subject.locate(38.5, -79.4)
+        results = subject.locate(38.111, -80.2)
         print(f"test results: {results}")
 
         # Assert
         self.assertEqual(results.city, "City A")
         self.assertEqual(results.state, "NC")
-        self.assertEqual(results.min_combined_distance, 1.1)
+        self.assertEqual(results.min_combined_distance, 0.311)
         self.assertEqual(results.location, "cache")
 
     def test_should_find_city_in_from_repo(self):
