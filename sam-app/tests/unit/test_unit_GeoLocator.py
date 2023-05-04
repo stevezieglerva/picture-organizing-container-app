@@ -45,6 +45,7 @@ class Basics(unittest.TestCase):
         self.assertEqual(results.state, "NC")
         self.assertEqual(results.min_combined_distance, 0.311)
         self.assertEqual(results.location, "cache")
+        self.assertEqual(subject.cache_hit_ratio, 1.0)
 
     def test_should_find_city_in_from_repo(self):
         # Arrange
@@ -63,6 +64,24 @@ class Basics(unittest.TestCase):
         self.assertEqual(results.state, "NC")
         self.assertEqual(results.min_combined_distance, 0.2235)
         self.assertEqual(results.location, "cache")
+        self.assertEqual(subject.cache_hit_ratio, 0.0)
+
+
+class Cache(unittest.TestCase):
+    def test_should_find_later_cities_based_on_previous_cache_additions(self):
+        # Arrange
+        subject = GeoLocator(FakeCatalog("test-table"))
+        results = subject.locate(36.01, -78.7764)
+        results = subject.locate(36.02, -78.7765)
+        results = subject.locate(36.03, -78.7766)
+
+        # Act
+        results = subject.locate(36, -78.7765)
+        print(f"test results: {results}")
+        print(subject)
+
+        # Assert
+        self.assertEqual(subject.cache_hit_ratio, 0.75)
 
 
 if __name__ == "__main__":

@@ -21,55 +21,55 @@ class RecordNotFound(Exception):
 class UsingDynamoDB(ABC):
     @abstractmethod
     def __init__(self, table_name) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def put_item(self, record: dict) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def get_item(self, key: dict) -> dict:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def delete_item(self, ke: dict) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def query_table_equal(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def query_table_greater_than(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def query_table_begins(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def query_table_between(
         self, key, index_name="", scan_index_forward: bool = True
     ) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def query_index_begins(self, index_name, key) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def scan_full(self) -> list:
-        raise NotImplemented
+        raise NotImplementedError
 
     @retry(tries=3, backoff=1)
     def put_batch(self, records: list) -> dict:
-        raise NotImplemented
+        raise NotImplementedError
 
     def _set_key_fields(self):
         table_resp = self._db.describe_table(TableName=self.table_name)
