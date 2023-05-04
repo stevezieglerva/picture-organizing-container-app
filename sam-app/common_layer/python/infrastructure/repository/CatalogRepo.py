@@ -90,8 +90,13 @@ class StoringCatalogData(ABC):
     def add_new_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
         raise NotImplemented
 
-    def get_gis_by_state(state_id: str) -> List[GISRecord]:
-        pass
+    @abstractmethod
+    def get_gis_data_by_state(self, state_id: str) -> List[GISRecord]:
+        raise NotImplemented
+
+    @abstractmethod
+    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISRecord]:
+        raise NotImplemented
 
 
 class PictureCatalogRepo(StoringCatalogData):
