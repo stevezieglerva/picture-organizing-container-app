@@ -51,6 +51,12 @@ class LocationGuesser:
         if "Garden_Easter" in source:
             return Guess(source=source, city="Wheaton", state="MD")
 
+        if "Beach_2021-08" in source or "Beach_Canon_2021-08" in source:
+            return Guess(source=source, city="Surf City", state="NC")
+
+        if "Rebecca_Danzenbaker" in source in source:
+            return Guess(source=source, city="Ashburn", state="VA")
+
         if (
             "christmas" in source.lower() or "easter" in source.lower()
         ) and date_taken.year >= 2018:

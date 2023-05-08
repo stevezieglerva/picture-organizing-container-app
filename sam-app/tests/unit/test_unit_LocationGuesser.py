@@ -119,7 +119,7 @@ class BatchProcessing(unittest.TestCase):
         # Act
         count = 0
         for row in existing_pics:
-            if row["Prev Sunday"] == "4/27/14":
+            if row["Prev Sunday"] == "2/25/18":
                 count += 1
                 print(f"#{count} {row['key']}")
 
@@ -172,7 +172,17 @@ class BatchProcessing(unittest.TestCase):
         city = "Wheaton"
         guesses = [g for g in results if g is not None and g.city == city]
         print(guesses[0:1])
-        self.assertGreaterEqual(len(guesses), 83, city)
+        self.assertGreaterEqual(len(guesses), 79, city)
+
+        city = "Surf City"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 98, city)
+
+        city = "Ashburn"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 89, city)
 
         city_guessed = [g for g in results if g is not None]
         perc_guessed = round(len(city_guessed) / len(results), 2)
