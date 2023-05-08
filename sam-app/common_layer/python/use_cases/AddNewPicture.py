@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import List
 
-from domain.DTOs import HashRecord, PictureCatalogGroup, PictureRecord
+from domain.DTOs import HashRecord, MissingGISData, PictureCatalogGroup, PictureRecord
 from domain.GeoLocator import GeoLocator
 from domain.Picture import ImageIO, Picture
 from infrastructure.repository.CatalogRepo import StoringCatalogData
@@ -42,14 +42,25 @@ class AddNewPicture:
         if picture.gis_lat != None:
             gis_lat = picture.gis_lat
         gis_long = -1
+
+        city = ""
+        state = ""
+        missing_gis_data = None
         if picture.gis_long != None:
             gis_long = picture.gis_long
-
         if gis_lat != -1 and gis_long != -1:
             location = self._geo_locator.locate(gis_lat, gis_long)
             if location != None:
                 city = location.city
                 state = location.state
+        else:
+            missing_gis_data = MissingGISData(
+                pk="MISSING_GIS",
+                sk=picture.source,
+                s3_url=picture.source,
+                date_added=self._clock.get_time(),
+                date_updated=self._clock.get_time(),
+            )
 
         random_shown = random.randint(1, 100)
         last_shown_pk = "NEVER_SHOW"
@@ -61,7 +72,9 @@ class AddNewPicture:
             last_shown_sk = f"{last_shown_date.strftime('%Y-%m-%d')}_{random_shown}"
 
         on_this_day = picture.taken.strftime("%m-%d")
-
+        model = ""
+        if picture.model:
+            model = picture.model
         picture_record = PictureRecord(
             pk=f"PICTURE",
             sk=picture.source,
@@ -92,7 +105,7 @@ class AddNewPicture:
             year=picture.taken.year,
             month=picture.taken.month,
             day=picture.taken.day,
-            model=picture.model,
+            model=model,
             update_desc=f"{update_tmsp}-{new_update_desc}",
             gis_lat=gis_lat,
             gis_long=gis_long,
@@ -110,7 +123,9 @@ class AddNewPicture:
                 "PHASH", str(picture.hash_phash), picture.source
             )
         )
-        return PictureCatalogGroup(picture=picture_record, hashes=hashes)
+        return PictureCatalogGroup(
+            picture=picture_record, hashes=hashes, missing_gis_data=missing_gis_data
+        )
 
     def _create_hash_dynamodb_recordset(
         self,

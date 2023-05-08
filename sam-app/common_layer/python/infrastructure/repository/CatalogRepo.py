@@ -41,6 +41,10 @@ class PictureCatalogRepo(StoringCatalogData):
         json_record_set.append(asdict(picture_records.picture))
         for r in picture_records.hashes:
             json_record_set.append(asdict(r))
+        if picture_records.missing_gis_data:
+            print("adding missing gis")
+            json_record_set.append(asdict(picture_records.missing_gis_data))
+        print(json.dumps(json_record_set, indent=3, default=str))
         return self._db.put_batch(json_record_set)
 
     def get_gis_data_by_state(self, state_id: str) -> List[GISRecord]:

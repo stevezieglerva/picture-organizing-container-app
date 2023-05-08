@@ -69,6 +69,16 @@ class HashRecord:
 
 
 @dataclass(frozen=True)
+class MissingGISData:
+    pk: str
+    sk: str
+    s3_url: str
+    date_added: str
+    date_updated: str
+
+
+@dataclass(frozen=True)
 class PictureCatalogGroup:
     picture: PictureRecord
     hashes: List[HashRecord]
+    missing_gis_data: MissingGISData

@@ -128,6 +128,77 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.gsi4_sk, "048b5ba2c6a9f13b89e59c0751b6e8c3")
         self.assertEqual(results.picture.gsi5_pk, "DATE_TAKEN")
         self.assertEqual(results.picture.gsi5_sk, "2023-01-13T07:43:54")
+        self.assertEqual(results.missing_gis_data, None)
+
+    def test_should_add_new_picture_to_catalog_without_gps(self):
+        # Arrange
+        repo = FakeRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        subject = AddNewPicture(repo, FakeClock("2023-01-02 03:04:05"))
+        picture = Picture(
+            "tests/unit/data/picture_files/without_gps.jpg", ImageIOLocal()
+        )
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.picture.pk, "PICTURE")
+        self.assertEqual(
+            results.picture.sk, "tests/unit/data/picture_files/without_gps.jpg"
+        )
+        self.assertEqual(results.picture.gis_lat, -1)
+        self.assertEqual(results.picture.gis_long, -1)
+        self.assertEqual(results.picture.city, None)
+        self.assertEqual(results.picture.state, None)
+        self.assertEqual(results.missing_gis_data.pk, "MISSING_GIS")
+
+
+class BasicHashRecord(unittest.TestCase):
+    def test_should_add_new_hashes(self):
+        # Arrange
+        repo = FakeRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        subject = AddNewPicture(repo, FakeClock("2023-01-02 03:04:05"))
+        picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
+        print(picture)
+
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(len(results.hashes), 2)
+        self.assertEqual(results.hashes[0].pk, "HASH_AVERAGE_HASH")
+        self.assertEqual(
+            results.hashes[0].sk, "tests/unit/data/picture_files/with_gps.jpg"
+        )
+        self.assertEqual(results.hashes[0].gsi1_pk, "AVERAGE_HASH_1")
+        self.assertEqual(results.hashes[0].gsi1_sk, "fdf9")
+        self.assertEqual(results.hashes[0].gsi2_pk, "AVERAGE_HASH_2")
+        self.assertEqual(results.hashes[0].gsi2_sk, "0303")
+        self.assertEqual(results.hashes[0].gsi3_pk, "AVERAGE_HASH_3")
+        self.assertEqual(results.hashes[0].gsi3_sk, "23f3")
+        self.assertEqual(results.hashes[0].gsi4_pk, "AVERAGE_HASH_4")
+        self.assertEqual(results.hashes[0].gsi4_sk, "1f0f")
+        self.assertEqual(results.hashes[0].hash_value, "fdf9030323f31f0f")
+
+        self.assertEqual(results.hashes[1].pk, "HASH_PHASH")
+        self.assertEqual(
+            results.hashes[1].sk, "tests/unit/data/picture_files/with_gps.jpg"
+        )
+        self.assertEqual(results.hashes[1].gsi1_pk, "PHASH_1")
+        self.assertEqual(results.hashes[1].gsi1_sk, "aeea")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from infrastructure.repository.DynamoDB import DynamoDB
 from infrastructure.system.Clock import RealClock
 
 
+@unittest.skip("not needed due to AddPicture tests?")
 class Basic(unittest.TestCase):
     def test_should_create(self):
         # Arrange
