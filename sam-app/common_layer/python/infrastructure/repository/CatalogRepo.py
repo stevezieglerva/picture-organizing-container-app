@@ -83,13 +83,21 @@ class PictureCatalogRepo(StoringCatalogData):
     ) -> List[PictureDBRecord]:
         pass
         now = self._clock.get_time() - delta
-        pk = f"DATE_ADDED#{layout}"
+        pk = f"DATE_ADDED#landscape"
+        sk = now.isoformat()
+        raw_records_all = self._db.query_table_greater_than(
+            {"gsi2_pk": pk, "gsi2_sk": sk}, "gsi2", False
+        )
+
+        pk = f"DATE_ADDED#portrait"
         sk = now.isoformat()
         raw_records = self._db.query_table_greater_than(
             {"gsi2_pk": pk, "gsi2_sk": sk}, "gsi2", False
         )
+        raw_records_all.extend(raw_records)
+
         object_records = []
-        for r in raw_records:
+        for r in raw_records_all:
             picture_db_record = PictureDBRecord(**r)
             object_records.append(picture_db_record)
         return object_records
