@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
-from domain.DTOs import GISRecord, PictureCatalogGroup
+from domain.DTOs import GISDBRecord, PictureCatalogGroup
 from domain.Picture import ImageIOS3, Picture
 from infrastructure.repository.CatalogRepo import PictureCatalogRepo
 from infrastructure.repository.DynamoDB import DynamoDB
@@ -12,7 +12,6 @@ from infrastructure.system.Clock import RealClock
 from use_cases.AddNewPicture import AddNewPicture
 
 
-@unittest.skip("")
 class Basic(unittest.TestCase):
     def test_should_add_new_picture_to_catalog_with_gps(self):
         # Arrange

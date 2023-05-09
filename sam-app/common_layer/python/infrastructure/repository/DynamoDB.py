@@ -68,7 +68,7 @@ class UsingDynamoDB(ABC):
         raise NotImplementedError
 
     @retry(tries=3, backoff=1)
-    def put_batch(self, records: list) -> dict:
+    def put_batch(self, records: list) -> BatchResults:
         raise NotImplementedError
 
     def _set_key_fields(self):
@@ -322,7 +322,7 @@ class DynamoDB(UsingDynamoDB):
         return results
 
     @retry(tries=3, backoff=1)
-    def put_batch(self, records: list, batch_size: int = 25) -> dict:
+    def put_batch(self, records: list, batch_size: int = 25) -> BatchResults:
         count = 0
         all_results = []
         for chunk in divide_chunks(records, batch_size):

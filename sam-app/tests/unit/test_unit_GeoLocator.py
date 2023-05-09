@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from domain.GeoLocator import GeoLocator
 from infrastructure.repository.CatalogRepo import (
-    GISRecord,
+    GISDBRecord,
     PictureCatalogGroup,
     StoringCatalogData,
 )
@@ -17,13 +17,13 @@ class FakeCatalog(StoringCatalogData):
     def add_new_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
         raise NotImplemented
 
-    def get_gis_data_by_state(self, state_id: str) -> List[GISRecord]:
+    def get_gis_data_by_state(self, state_id: str) -> List[GISDBRecord]:
         return []
 
-    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISRecord]:
+    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISDBRecord]:
         return [
-            GISRecord(lat=36, long=-79, city="City C", state="NC"),
-            GISRecord(lat=37, long=-88, city="City D", state="NC"),
+            GISDBRecord(lat=36, long=-79, city="City C", state="NC"),
+            GISDBRecord(lat=37, long=-88, city="City D", state="NC"),
         ]
 
 
@@ -31,8 +31,8 @@ class Basics(unittest.TestCase):
     def test_should_find_city_in_the_cache(self):
         # Arrange
         cache = [
-            GISRecord(lat=38, long=-80, city="City A", state="NC"),
-            GISRecord(lat=39, long=-81, city="City B", state="NC"),
+            GISDBRecord(lat=38, long=-80, city="City A", state="NC"),
+            GISDBRecord(lat=39, long=-81, city="City B", state="NC"),
         ]
         subject = GeoLocator(FakeCatalog("test-table"), cache)
 
@@ -50,8 +50,8 @@ class Basics(unittest.TestCase):
     def test_should_find_city_in_from_repo(self):
         # Arrange
         cache = [
-            GISRecord(lat=38, long=-80, city="City A", state="NC"),
-            GISRecord(lat=39, long=-81, city="City B", state="NC"),
+            GISDBRecord(lat=38, long=-80, city="City A", state="NC"),
+            GISDBRecord(lat=39, long=-81, city="City B", state="NC"),
         ]
         subject = GeoLocator(FakeCatalog("test-table"), cache)
 

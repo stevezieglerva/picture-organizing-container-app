@@ -4,7 +4,7 @@ from typing import List
 
 
 @dataclass(frozen=True)
-class GISRecord:
+class GISDBRecord:
     lat: float
     long: float
     city: str
@@ -12,7 +12,7 @@ class GISRecord:
 
 
 @dataclass(frozen=True)
-class PictureRecord:
+class PictureDBRecord:
     pk: str
     sk: str
     ulid: str
@@ -52,7 +52,7 @@ class PictureRecord:
 
 
 @dataclass(frozen=True)
-class HashRecord:
+class HashDBRecord:
     pk: str
     sk: str
     hash_type: str
@@ -69,7 +69,7 @@ class HashRecord:
 
 
 @dataclass(frozen=True)
-class MissingGISData:
+class MissingGISDataDBRecord:
     pk: str
     sk: str
     s3_url: str
@@ -79,6 +79,6 @@ class MissingGISData:
 
 @dataclass(frozen=True)
 class PictureCatalogGroup:
-    picture: PictureRecord
-    hashes: List[HashRecord]
-    missing_gis_data: MissingGISData
+    picture: PictureDBRecord
+    hashes: List[HashDBRecord]
+    missing_gis_data: MissingGISDataDBRecord

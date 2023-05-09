@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from domain.GeoLocator import GeoLocator
 from infrastructure.repository.CatalogRepo import (
-    GISRecord,
+    GISDBRecord,
     PictureCatalogGroup,
     PictureCatalogRepo,
     StoringCatalogData,

@@ -3,12 +3,18 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import List
 
-from domain.DTOs import HashRecord, MissingGISData, PictureCatalogGroup, PictureRecord
+from domain.DTOs import (
+    HashDBRecord,
+    MissingGISDataDBRecord,
+    PictureCatalogGroup,
+    PictureDBRecord,
+)
 from domain.GeoLocator import GeoLocator
 from domain.LocationGuesser import LocationGuesser
-from domain.Picture import ImageIO, Picture
-from infrastructure.repository.CatalogRepo import StoringCatalogData
-from infrastructure.system.Clock import ITellingTime
+from domain.Picture import ImageIO, ImageIOS3, Picture
+from infrastructure.repository.CatalogRepo import PictureCatalogRepo, StoringCatalogData
+from infrastructure.repository.DynamoDB import DynamoDB
+from infrastructure.system.Clock import ITellingTime, RealClock
 from ulid import ULID
 
 
@@ -25,8 +31,7 @@ class AddNewPicture:
             self._clock.get_time(),
             "created",
         )
-        self._repo.add_new_picture_to_catalog(records)
-        return records
+        return self._repo.add_new_picture_to_catalog(records)
 
     def _convert_picture_to_catalogrecords(
         self,
@@ -63,7 +68,7 @@ class AddNewPicture:
                 state = guess.state
         if city == "":
             print("Giving up on GIS data ...")
-            missing_gis_data = MissingGISData(
+            missing_gis_data = MissingGISDataDBRecord(
                 pk="MISSING_GIS",
                 sk=picture.source,
                 s3_url=picture.source,
@@ -84,7 +89,7 @@ class AddNewPicture:
         model = ""
         if picture.model:
             model = picture.model
-        picture_record = PictureRecord(
+        picture_record = PictureDBRecord(
             pk=f"PICTURE",
             sk=picture.source,
             # only shown if original
@@ -145,7 +150,7 @@ class AddNewPicture:
         records = []
         print(f"\t\t{hash_type}/{hash_value}")
 
-        hash_record = HashRecord(
+        hash_record = HashDBRecord(
             pk=f"HASH_{hash_type}",
             sk=s3_url,
             hash_type=hash_type,
@@ -162,3 +167,17 @@ class AddNewPicture:
         )
 
         return hash_record
+
+
+def add_new_picture_from_s3(
+    s3_url: str, db_table_name: str = "master-pictures-catalog"
+) -> PictureCatalogGroup:
+    db = DynamoDB(db_table_name)
+    repo = PictureCatalogRepo(
+        db,
+        RealClock(),
+    )
+    addnew = AddNewPicture(repo, RealClock())
+
+    picture = Picture(s3_url, ImageIOS3())
+    return addnew.add_new_picture_to_catalog(picture)

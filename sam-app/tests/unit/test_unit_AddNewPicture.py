@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
-from domain.DTOs import GISRecord, PictureCatalogGroup
+from domain.DTOs import GISDBRecord, PictureCatalogGroup
 from domain.Picture import ImageIOLocal, Picture
 from infrastructure.repository.CatalogRepo import StoringCatalogData
 from infrastructure.repository.DynamoDB import UsingDynamoDB
@@ -61,11 +61,11 @@ class FakeRepo(StoringCatalogData):
     def add_new_picture_to_catalog(self, record: PictureCatalogGroup) -> None:
         pass
 
-    def get_gis_data_by_state(self, state_id: str) -> List[GISRecord]:
+    def get_gis_data_by_state(self, state_id: str) -> List[GISDBRecord]:
         pass
 
-    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISRecord]:
-        return [GISRecord(lat=36, long=-79, city="Springfield", state="VA")]
+    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISDBRecord]:
+        return [GISDBRecord(lat=36, long=-79, city="Springfield", state="VA")]
 
 
 class Basic(unittest.TestCase):

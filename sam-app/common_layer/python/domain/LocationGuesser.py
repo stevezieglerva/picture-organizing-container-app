@@ -65,7 +65,7 @@ class LocationGuesser:
         if "Beach_2021-08" in source or "Beach_Canon_2021-08" in source:
             return Guess(source=source, city="Surf City", state="NC")
 
-        if "Rebecca_Danzenbaker" in source in source:
+        if "Rebecca_Danzenbaker" in source:
             return Guess(source=source, city="Ashburn", state="VA")
 
         if "2012_05_20_" in source in source:
@@ -78,19 +78,19 @@ class LocationGuesser:
         ):
             return Guess(source=source, city="Washington", state="DC")
 
-        if "Thanksgiving" in source in source:
+        if "Thanksgiving" in source:
             return Guess(source=source, city="Gainesville", state="VA")
 
-        if "Farm_School" in source in source:
+        if "Farm_School" in source or "Frying_Pan" in source:
             return Guess(source=source, city="Herdon", state="VA")
 
-        if "Omni_Homestead" in source in source:
+        if "Omni_Homestead" in source:
             return Guess(source=source, city="Hot Springs", state="VA")
 
-        if "Clemijontri" in source in source:
+        if "Clemijontri" in source:
             return Guess(source=source, city="McLean", state="VA")
 
-        if "Charlotte_Preschool" in source in source:
+        if "Charlotte_Preschool" in source:
             return Guess(source=source, city="Apex", state="NC")
 
         if (

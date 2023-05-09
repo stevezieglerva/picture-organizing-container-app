@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import List
 
-from infrastructure.repository.CatalogRepo import GISRecord, StoringCatalogData
+from infrastructure.repository.CatalogRepo import GISDBRecord, StoringCatalogData
 
 
 @dataclass(frozen=True)
@@ -13,7 +13,7 @@ class City:
 
 
 class GeoLocator:
-    def __init__(self, repo: StoringCatalogData, cache: List[GISRecord] = []):
+    def __init__(self, repo: StoringCatalogData, cache: List[GISDBRecord] = []):
         self._repo = repo
         self._cache = cache
         self._total_requests = 0.0
@@ -44,7 +44,7 @@ cache_hit_ratio:  {self.cache_hit_ratio}
         return city
 
     def _find_closest_in_list(
-        self, records: List[GISRecord], lat: float, long: float
+        self, records: List[GISDBRecord], lat: float, long: float
     ) -> City:
         result = None
         min_delta = 1000.0
