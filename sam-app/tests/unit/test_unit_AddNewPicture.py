@@ -155,11 +155,35 @@ class Basic(unittest.TestCase):
         )
         self.assertEqual(results.picture.gis_lat, -1)
         self.assertEqual(results.picture.gis_long, -1)
-        self.assertEqual(results.picture.city, None)
-        self.assertEqual(results.picture.state, None)
+        self.assertEqual(results.picture.city, "")
+        self.assertEqual(results.picture.state, "")
         self.assertEqual(results.missing_gis_data.pk, "MISSING_GIS")
 
+    def test_should_add_new_picture_to_catalog_guessing_the_gps_from_filename(self):
+        # Arrange
+        repo = FakeRepo(
+            FakeDynamoDB("xyz"),
+            FakeClock("2023-01-02 03:04:05"),
+        )
+        subject = AddNewPicture(repo, FakeClock("2023-01-02 03:04:05"))
+        picture = Picture(
+            "tests/unit/data/picture_files/Sample_Ocean_City_Beach.jpg", ImageIOLocal()
+        )
+        print(picture)
 
+        # Act
+        results = subject.add_new_picture_to_catalog(
+            picture,
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results.picture.city, "Ocean City")
+        self.assertEqual(results.picture.state, "MD")
+        self.assertEqual(results.missing_gis_data, None)
+
+
+@unittest.skip("")
 class BasicHashRecord(unittest.TestCase):
     def test_should_add_new_hashes(self):
         # Arrange

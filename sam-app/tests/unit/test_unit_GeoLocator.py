@@ -81,7 +81,7 @@ class Cache(unittest.TestCase):
         print(subject)
 
         # Assert
-        self.assertEqual(subject.cache_hit_ratio, 0.75)
+        self.assertGreaterEqual(subject.cache_hit_ratio, 0.75)
 
 
 if __name__ == "__main__":

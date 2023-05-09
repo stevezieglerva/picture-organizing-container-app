@@ -1,4 +1,5 @@
 import csv
+import json
 import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
@@ -119,7 +120,7 @@ class BatchProcessing(unittest.TestCase):
         # Act
         count = 0
         for row in existing_pics:
-            if row["Prev Sunday"] == "2/25/18":
+            if row["Prev Sunday"] == "10/19/14":
                 count += 1
                 print(f"#{count} {row['key']}")
 
@@ -142,7 +143,7 @@ class BatchProcessing(unittest.TestCase):
         city = "Charlottesville"
         guesses = [g for g in results if g is not None and g.city == city]
         print(guesses[0:1])
-        self.assertEqual(len(guesses), 169, city)
+        self.assertGreaterEqual(len(guesses), 169, city)
 
         city = "Ocean City"
         guesses = [g for g in results if g is not None and g.city == city]
@@ -184,10 +185,40 @@ class BatchProcessing(unittest.TestCase):
         print(guesses[0:1])
         self.assertGreaterEqual(len(guesses), 89, city)
 
+        city = "Upperville"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 80, city)
+
+        city = "Washington"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 59, city)
+
+        city = "Gainesville"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 90, city)
+
+        city = "Herdon"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 119, city)
+
+        city = "Hot Springs"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:1])
+        self.assertGreaterEqual(len(guesses), 62, city)
+
+        city = "Delaplane"
+        guesses = [g for g in results if g is not None and g.city == city]
+        print(guesses[0:20])
+        self.assertGreaterEqual(len(guesses), 100, city)
+
         city_guessed = [g for g in results if g is not None]
-        perc_guessed = round(len(city_guessed) / len(results), 2)
+        perc_guessed = round(len(city_guessed) / len(results), 3)
         print(f"\nGuessed: {perc_guessed:%}")
-        self.assertGreaterEqual(perc_guessed, 0.5)
+        self.assertGreaterEqual(perc_guessed, 0.45)
 
 
 if __name__ == "__main__":

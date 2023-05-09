@@ -5,6 +5,7 @@ from typing import List
 
 from domain.DTOs import HashRecord, MissingGISData, PictureCatalogGroup, PictureRecord
 from domain.GeoLocator import GeoLocator
+from domain.LocationGuesser import LocationGuesser
 from domain.Picture import ImageIO, Picture
 from infrastructure.repository.CatalogRepo import StoringCatalogData
 from infrastructure.system.Clock import ITellingTime
@@ -38,22 +39,30 @@ class AddNewPicture:
         if picture.height > picture.width:
             layout = "portrait"
         update_tmsp = date_updated.strftime("%m/%d/%y")
-        gis_lat = -1
-        if picture.gis_lat != None:
-            gis_lat = picture.gis_lat
-        gis_long = -1
 
         city = ""
         state = ""
         missing_gis_data = None
+        gis_lat = -1
+        if picture.gis_lat != None:
+            gis_lat = picture.gis_lat
+        gis_long = -1
         if picture.gis_long != None:
             gis_long = picture.gis_long
         if gis_lat != -1 and gis_long != -1:
+            print("Geolocating ...")
             location = self._geo_locator.locate(gis_lat, gis_long)
             if location != None:
                 city = location.city
                 state = location.state
-        else:
+        if gis_lat == -1 and gis_long == -1:
+            print("Guesing...")
+            guess = LocationGuesser().guess(picture.source, picture.taken)
+            if guess != None:
+                city = guess.city
+                state = guess.state
+        if city == "":
+            print("Giving up on GIS data ...")
             missing_gis_data = MissingGISData(
                 pk="MISSING_GIS",
                 sk=picture.source,
