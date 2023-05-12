@@ -44,6 +44,9 @@ class LocationGuesser:
         if "Asheville" in source:
             return Guess(source=source, city="Asheville", state="NC")
 
+        if "Florida_Spring_Break" in source:
+            return Guess(source=source, city="Fort Myers", state="FL")
+
         if "Luray_Caverns" in source:
             return Guess(source=source, city="Luray", state="VA")
 
@@ -93,10 +96,14 @@ class LocationGuesser:
         if "Charlotte_Preschool" in source:
             return Guess(source=source, city="Apex", state="NC")
 
+        if "_TAC" in source:
+            return Guess(source=source, city="Cary", state="NC")
+
         if (
             "christmas" in source.lower()
             or "easter" in source.lower()
             or "halloween" in source.lower()
+            or "pool" in source.lower()
         ) and date_taken.year >= 2018:
             return Guess(source=source, city="Apex", state="NC")
 
@@ -104,6 +111,7 @@ class LocationGuesser:
             "christmas" in source.lower()
             or "easter" in source.lower()
             or "halloween" in source.lower()
+            or "pool" in source.lower()
         ) and date_taken.year < 2018:
             return Guess(source=source, city="Clifton", state="VA")
 

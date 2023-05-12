@@ -2,9 +2,16 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
+from domain.DTOs import (
+    GISDBRecord,
+    HashDBRecord,
+    MissingGISDataDBRecord,
+    PictureCatalogGroup,
+    PictureDBRecord,
+)
 from domain.Picture import ImageIOLocal, Picture
 from infrastructure.repository.CatalogRepo import PictureCatalogRepo
-from infrastructure.repository.DynamoDB import UsingDynamoDB
+from infrastructure.repository.DynamoDB import BatchResults, UsingDynamoDB
 from infrastructure.system.Clock import FakeClock
 
 
@@ -47,9 +54,14 @@ class FakeDynamoDB(UsingDynamoDB):
     def scan_full(self) -> list:
         raise NotImplemented
 
+    def put_batch(self, records: list) -> BatchResults:
+        raise ValueError("Fake error for test")
 
-@unittest.skip("")
-class BasicPictureRecord(unittest.TestCase):
+    def delete_batch(self, records: list, batch_size: int = 25) -> BatchResults:
+        raise NotImplementedError
+
+
+class Basic(unittest.TestCase):
     def test_should_create(self):
         # Arrange
 
@@ -58,51 +70,6 @@ class BasicPictureRecord(unittest.TestCase):
             FakeDynamoDB("xyz"),
             FakeClock("2023-01-01"),
         )
-
-
-@unittest.skip("")
-class LastShownCorrect(unittest.TestCase):
-    def test_should_not_use_last_shown_since_not_original(self):
-        # Arrange
-        subject = PictureCatalogRepo(
-            FakeDynamoDB("xyz"),
-            FakeClock("2023-01-02 03:04:05"),
-        )
-        picture = Picture("tests/unit/data/picture_files/with_gps.jpg", ImageIOLocal())
-        print(picture)
-
-        # Act
-        results = subject.add_new_picture_to_catalog(
-            picture,
-        )
-        print(f"test results: {results}")
-
-        # Assert
-        self.assertEqual(results.picture.last_shown, datetime(1900, 1, 1))
-        self.assertEqual(results.picture.gsi1_pk, "NEVER_SHOW")
-        self.assertTrue(results.picture.gsi1_sk.startswith("-"))
-
-    def test_should_use_last_shown_since_original(self):
-        # Arrange
-        subject = PictureCatalogRepo(
-            FakeDynamoDB("xyz"),
-            FakeClock("2023-01-02 03:04:05"),
-        )
-        picture = Picture(
-            "tests/unit/data/picture_files/original/with_gps.jpg", ImageIOLocal()
-        )
-        print(picture)
-
-        # Act
-        results = subject.add_new_picture_to_catalog(
-            picture,
-        )
-        print(f"test results: {results}")
-
-        # Assert
-        self.assertEqual(results.picture.last_shown.year, 2023)
-        self.assertEqual(results.picture.gsi1_pk, "LAST_SHOWN#portrait")
-        self.assertTrue(results.picture.gsi1_sk.startswith("2023-01-01"))
 
 
 if __name__ == "__main__":

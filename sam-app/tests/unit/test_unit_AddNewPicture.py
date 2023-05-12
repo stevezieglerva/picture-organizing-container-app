@@ -21,6 +21,9 @@ class FakeDynamoDB(UsingDynamoDB):
     def put_batch(self, record) -> None:
         pass
 
+    def delete_batch(self):
+        pass
+
     def get_item(self, key) -> dict:
         raise NotImplemented
 
@@ -66,6 +69,9 @@ class FakeRepo(StoringCatalogData):
 
     def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISDBRecord]:
         return [GISDBRecord(lat=36, long=-79, city="Springfield", state="VA")]
+
+    def get_recently_added(self):
+        pass
 
 
 class Basic(unittest.TestCase):
@@ -122,8 +128,8 @@ class Basic(unittest.TestCase):
         self.assertEqual(results.picture.gsi1_sk, "-")
         self.assertEqual(results.picture.gsi2_pk, "DATE_ADDED#portrait")
         self.assertTrue(results.picture.gsi2_sk.startswith("2023-01-02"))
-        self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY#01-13")
-        self.assertTrue(results.picture.gsi3_sk.startswith("2023-01-13"))
+        self.assertEqual(results.picture.gsi3_pk, "ON_THIS_DAY")
+        self.assertEqual(results.picture.gsi3_sk, "01-13")
         self.assertEqual(results.picture.gsi4_pk, "UNIQUE_HASH")
         self.assertEqual(results.picture.gsi4_sk, "048b5ba2c6a9f13b89e59c0751b6e8c3")
         self.assertEqual(results.picture.gsi5_pk, "DATE_TAKEN")

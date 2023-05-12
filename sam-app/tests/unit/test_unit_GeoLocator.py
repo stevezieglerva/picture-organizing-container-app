@@ -26,6 +26,9 @@ class FakeCatalog(StoringCatalogData):
             GISDBRecord(lat=37, long=-88, city="City D", state="NC"),
         ]
 
+    def get_recently_added(self):
+        pass
+
 
 class Basics(unittest.TestCase):
     def test_should_find_city_in_the_cache(self):

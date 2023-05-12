@@ -67,8 +67,12 @@ class UsingDynamoDB(ABC):
     def scan_full(self) -> list:
         raise NotImplementedError
 
-    @retry(tries=3, backoff=1)
+    @abstractmethod
     def put_batch(self, records: list) -> BatchResults:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_batch(self, records: list, batch_size: int = 25) -> BatchResults:
         raise NotImplementedError
 
     def _set_key_fields(self):
@@ -333,13 +337,13 @@ class DynamoDB(UsingDynamoDB):
                 {"PutRequest": {"Item": r}} for r in formatted_records
             ]
             request = {self.table_name: formatted_requests}
-            print(json.dumps(request, indent=3, default=str))
+            # print(json.dumps(request, indent=3, default=str))
             resp = self._db.batch_write_item(RequestItems=request)
             all_results.append(resp)
         return BatchResults(batches_sent=count, batch_results=all_results)
 
     @retry(tries=3, backoff=1)
-    def delete_batch(self, records: list, batch_size: int = 25) -> dict:
+    def delete_batch(self, records: list, batch_size: int = 25) -> BatchResults:
         count = 0
         all_results = []
         for chunk in divide_chunks(records, batch_size):
@@ -347,7 +351,7 @@ class DynamoDB(UsingDynamoDB):
             print(f"Processing chunk #{count}")
             formatted_records = [self.convert_to_dynamodb_format(r) for r in chunk]
             print(formatted_records)
-            print(json.dumps(formatted_records, indent=3, default=str))
+            # print(json.dumps(formatted_records, indent=3, default=str))
             formatted_requests = [
                 {"DeleteRequest": {"Key": r}} for r in formatted_records
             ]

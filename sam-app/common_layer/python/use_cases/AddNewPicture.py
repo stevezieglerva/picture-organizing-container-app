@@ -31,7 +31,8 @@ class AddNewPicture:
             self._clock.get_time(),
             "created",
         )
-        return self._repo.add_new_picture_to_catalog(records)
+        self._repo.add_new_picture_to_catalog(records)
+        return records
 
     def _convert_picture_to_catalogrecords(
         self,
@@ -97,8 +98,8 @@ class AddNewPicture:
             gsi1_sk=last_shown_sk,
             gsi2_pk=f"DATE_ADDED#{layout}",
             gsi2_sk=f"{date_added.isoformat()}",
-            gsi3_pk=f"ON_THIS_DAY#{on_this_day}",
-            gsi3_sk=f"{picture.taken.isoformat()}",
+            gsi3_pk=f"ON_THIS_DAY",
+            gsi3_sk=on_this_day,
             gsi4_pk="UNIQUE_HASH",
             gsi4_sk=str(picture.hash_unique),
             gsi5_pk="DATE_TAKEN",
