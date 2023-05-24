@@ -18,6 +18,7 @@ from infrastructure.system.Clock import FakeClock
 class FakeDynamoDB(UsingDynamoDB):
     def __init__(self, table_name):
         self.table_name = table_name
+        self.limit = 1
 
     def put_item(self, record) -> None:
         pass

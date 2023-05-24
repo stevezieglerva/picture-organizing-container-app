@@ -47,8 +47,7 @@ else
         echo "Tests passed"
     else
         export tests_failed=1
-        echo "Some tests failed
-        "
+        echo "Some tests failed"
     fi
 
     coverage report 
@@ -59,6 +58,13 @@ else
         echo "⛔ Found coverage is too low"
     else
         echo "🏆 Coverage is good"
+    fi
+
+    if [ $tests_failed -eq 0 ]
+    then
+        echo "✅ Tests passed"
+    else
+        echo "❌ Some tests failed"
     fi
 
     # If fail argument provided and tests failed, exit with an error code

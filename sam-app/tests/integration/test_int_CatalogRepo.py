@@ -116,6 +116,7 @@ class Queries(unittest.TestCase):
             print(f"{r.date_added}: {r.s3_url}")
 
         # Assert
+        self.assertEqual(type(results[0]), PictureSelectionOption)
         recent_s3_names = [obj.s3_url for obj in results]
         self.assertTrue(
             "svz-master-pictures-new/original/2012/2012_10_21_Frying_Pan_Park_Fall_NiceCanon_0796_-_Copy.jpg"
@@ -138,6 +139,7 @@ class Queries(unittest.TestCase):
         # Act
         results = subject.get_oldest_shown()
         print("\nFound:")
+        print(results[0])
         for count, r in enumerate(results):
             print(f"#{count+1:<2} {r.last_shown}: {r.s3_url}")
 
@@ -153,6 +155,42 @@ class Queries(unittest.TestCase):
         self.assertEqual(len(count_portait), 5)
         count_landscape = [r for r in results if r.layout == "landscape"]
         self.assertEqual(len(count_landscape), 5)
+
+    def test_should_get_for_month_day(self):
+        # Arrange
+        add_results = add_new_picture_from_s3(
+            "svz-master-pictures-new/original/2010/2010_04_03_IMG_1618_-_Copy.jpg",
+            "master-pictures-catalog-test",
+        )
+        add_results = add_new_picture_from_s3(
+            "svz-master-pictures-new/original/2019/2019-04-03_Phone_Pictures_Owen_School_Concert_2019-04-03_13.27.28_-_Copy.jpg",
+            "master-pictures-catalog-test",
+        )
+
+        print("\n**** batch results:")
+        print(add_results)
+        subject = PictureCatalogRepo(
+            DynamoDB("master-pictures-catalog-test"),
+            RealClock(),
+        )
+
+        # Act
+        results = subject.get_by_month_day(4, 3)
+        print("\nFound:")
+        print(results[0])
+        for count, r in enumerate(results):
+            print(f"#{count+1:<2} {r.last_shown}: {r.s3_url}")
+
+        # Assert
+        recent_s3_names = [obj.s3_url for obj in results]
+        self.assertTrue(
+            "svz-master-pictures-new/original/2010/2010_04_03_IMG_1618_-_Copy.jpg"
+            in recent_s3_names
+        )
+        self.assertTrue(
+            "svz-master-pictures-new/original/2019/2019-04-03_Phone_Pictures_Owen_School_Concert_2019-04-03_13.27.28_-_Copy.jpg"
+            in recent_s3_names
+        )
 
 
 if __name__ == "__main__":

@@ -29,6 +29,12 @@ class FakeCatalog(StoringCatalogData):
     def get_recently_added(self):
         pass
 
+    def get_by_month_day(self):
+        pass
+
+    def get_oldest_shown(self):
+        pass
+
 
 class Basics(unittest.TestCase):
     def test_should_find_city_in_the_cache(self):

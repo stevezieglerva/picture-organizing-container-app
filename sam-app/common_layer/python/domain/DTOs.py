@@ -120,3 +120,14 @@ class PictureSelectionOption:
     s3_url: str
     layout: str
     last_shown: datetime
+    date_added: datetime
+
+
+@dataclass(frozen=True)
+class PictureForAPI:
+    key_small: str
+    presigned_url: str
+    height: int
+    width: int
+    db_record: dict
+    picture_type: str

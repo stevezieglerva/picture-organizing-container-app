@@ -73,6 +73,12 @@ class FakeRepo(StoringCatalogData):
     def get_recently_added(self):
         pass
 
+    def get_by_month_day(self):
+        pass
+
+    def get_oldest_shown(self):
+        pass
+
 
 class Basic(unittest.TestCase):
     def test_should_add_new_picture_to_catalog_with_gps(self):

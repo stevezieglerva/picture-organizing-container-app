@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import List
 
+from dateutil.parser import *
 from domain import Picture
 from domain.DTOs import (
     GISDBRecord,
@@ -45,8 +46,20 @@ class StoringCatalogData(ABC):
     @abstractmethod
     def get_recently_added(
         self, layout: str, delta: timedelta = timedelta(days=1)
-    ) -> List[PictureDBRecord]:
-        pass
+    ) -> List[PictureSelectionOption]:
+        raise NotImplemented
+
+    @abstractmethod
+    def get_oldest_shown(
+        self, delta: timedelta = timedelta(days=1)
+    ) -> List[PictureSelectionOption]:
+        raise NotImplemented
+
+    @abstractmethod
+    def get_by_month_day(
+        self, delta: timedelta = timedelta(days=1)
+    ) -> List[PictureSelectionOption]:
+        raise NotImplemented
 
 
 class PictureCatalogRepo(StoringCatalogData):
@@ -100,7 +113,7 @@ class PictureCatalogRepo(StoringCatalogData):
 
     def get_recently_added(
         self, delta: timedelta = timedelta(days=1)
-    ) -> List[PictureDBRecord]:
+    ) -> List[PictureSelectionOption]:
         now = self._clock.get_time() - delta
         pk = f"DATE_ADDED#landscape"
         sk = now.isoformat()
@@ -118,7 +131,14 @@ class PictureCatalogRepo(StoringCatalogData):
         object_records = []
         for r in raw_records_all:
             picture_db_record = PictureDBRecord(**r)
-            object_records.append(picture_db_record)
+            object_records.append(
+                PictureSelectionOption(
+                    s3_url=picture_db_record.s3_url,
+                    layout=picture_db_record.layout,
+                    last_shown=parse(picture_db_record.last_shown),
+                    date_added=parse(picture_db_record.date_added),
+                )
+            )
         return object_records
 
     def get_oldest_shown(self, limit: int = 5) -> List[PictureSelectionOption]:
@@ -145,11 +165,15 @@ class PictureCatalogRepo(StoringCatalogData):
                 PictureSelectionOption(
                     s3_url=picture_db_record.s3_url,
                     layout=picture_db_record.layout,
-                    last_shown=picture_db_record.last_shown,
+                    last_shown=parse(picture_db_record.last_shown),
+                    date_added=parse(picture_db_record.date_added),
                 )
             )
         self._db.limit = self._limit
         return object_records
+
+    def get_by_month_day(self):
+        raise NotImplementedError
 
 
 def create_picture_record_from_picture(
