@@ -68,9 +68,6 @@ class FakeRepo(StoringCatalogData):
     def get_by_month_day(self):
         pass
 
-    def get_oldest_shown(self):
-        pass
-
 
 class FakeRandomPicker(IDatePicker):
     def get_date_type(self, today: datetime) -> DateOptions:
@@ -82,14 +79,15 @@ class Create(unittest.TestCase):
         # Arrange
         subject = GetPicture(
             FakeRepo(None, FakeClock("2023-01-01")),
+            "fake-bucket",
             S3FakeLocal(),
             DatePicker(),
             FakeClock("2023-02-03"),
         )
 
 
-class RandomPictures(unittest.TestCase):
-    def test_should_pick_random_pic(self):
+class SelectPicctureRandom(unittest.TestCase):
+    def test_should_pick_landscape_random_pic(self):
         # Arrange
         repo = FakeRepo(None, FakeClock("2023-02-03"))
         repo.set_recently_updated(
@@ -106,15 +104,50 @@ class RandomPictures(unittest.TestCase):
         )
 
         subject = GetPicture(
-            repo, S3FakeLocal(), FakeRandomPicker(), FakeClock("2023-02-03")
+            repo,
+            "fake-bucket",
+            S3FakeLocal(),
+            FakeRandomPicker(),
+            FakeClock("2023-02-03"),
         )
 
         # Act
-        results = subject.get_picture(2000, 1000, "Mozilla")
+        results = subject.select_picture(2000, 1000, "Mozilla")
         print(f"test results: {results}")
 
         # Assert
-        self.assertEqual(results.key_small, "oldest_landscape.jpg")
+        self.assertEqual(results, "oldest_landscape.jpg")
+
+    def test_should_pick_portrait_random_pic(self):
+        # Arrange
+        repo = FakeRepo(None, FakeClock("2023-02-03"))
+        repo.set_recently_updated(
+            [
+                ("updated_landscape.jpg", "landscape", -2, -1),
+                ("updated_portrait.jpg", "portrait", -2, -1),
+            ]
+        )
+        repo.set_oldest_shown(
+            [
+                ("oldest_landscape.jpg", "landscape", -100, -50),
+                ("oldest_portrait.jpg", "portrait", -100, -50),
+            ]
+        )
+
+        subject = GetPicture(
+            repo,
+            "fake-bucket",
+            S3FakeLocal(),
+            FakeRandomPicker(),
+            FakeClock("2023-02-03"),
+        )
+
+        # Act
+        results = subject.select_picture(300, 500, "Mozilla")
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results, "oldest_portrait.jpg")
 
 
 if __name__ == "__main__":

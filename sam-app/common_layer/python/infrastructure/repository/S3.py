@@ -28,6 +28,10 @@ class S3Base(ABC):
     def delete_object(self, bucket, key):
         raise NotImplementedError
 
+    @abstractmethod
+    def get_presigned_url(self, bucket, key) -> str:
+        raise NotImplementedError
+
 
 class S3(S3Base):
     """Actual S3 class with put and list objects"""
@@ -116,3 +120,6 @@ class S3FakeLocal(S3Base):
         filename = f"test_fakes3_integration_{bucket}__{key.replace('/', '__')}"
         print(f"Deleting: {filename}")
         os.remove(filename)
+
+    def get_presigned_url(self, bucket, key) -> str:
+        return f"https://{bucket}.s3.us-east-1.amazonaws.com/{key}?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEOH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCICmQaeMb8u"
