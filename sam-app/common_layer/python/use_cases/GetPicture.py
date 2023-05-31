@@ -27,7 +27,7 @@ class GetPictureUseCase:
         self._date_picker = date_picker
         self._clock = clock
         self._imageio = image_io
-        self._resized_path_prefix = f"{self._bucket}/sweet_shuffle/"
+        self._resized_path_prefix = "/sweet_shuffle/"
         if resized_path_prefix != "":
             self._resized_path_prefix = resized_path_prefix
 
@@ -54,12 +54,13 @@ class GetPictureUseCase:
             f"{self._resized_path_prefix}current_resized_{random.randint(0, 100)}.jpg"
         )
         resized_picture = picture.resize_fitting_aspect_ratio(
-            resized_new_key, resize_width, resize_height
+            f"{self._bucket}{resized_new_key}", resize_width, resize_height
         )
+        presigned_url = self._s3.get_presigned_url(self._bucket, resized_new_key)
 
         return PictureForAPI(
             key_small=selected_picture.s3_url,
-            presigned_url="y",
+            presigned_url=presigned_url,
             height=resize_height,
             width=resize_width,
             db_record={},

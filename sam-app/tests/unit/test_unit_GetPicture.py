@@ -83,6 +83,11 @@ class SelectPicctureRandom(unittest.TestCase):
             results.key_small,
             "tests/unit/data/picture_files/2020-10-22 15.51.31.jpgx3000.jpg",
         )
+        self.assertTrue(
+            results.presigned_url.startswith(
+                "https://fake-bucket.s3.us-east-1.amazonaws.com/temp_current_resized"
+            )
+        )
 
     @unittest.skip("")
     def test_should_pick_portrait_random_pic(self):
