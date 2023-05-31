@@ -45,7 +45,7 @@ class StoringCatalogData(ABC):
 
     @abstractmethod
     def get_recently_added(
-        self, layout: str, delta: timedelta = timedelta(days=1)
+        self, delta: timedelta = timedelta(days=1)
     ) -> List[PictureSelectionOption]:
         raise NotImplemented
 

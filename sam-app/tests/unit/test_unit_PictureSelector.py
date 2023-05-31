@@ -38,8 +38,8 @@ class SelectPicture(unittest.TestCase):
         # Arrange
         oldest_shown = create_catalog_record_list(
             [
-                CatalogShortcut("A.jpg", "landscape", 200, 156),
-                CatalogShortcut("B.jpg", "portrait", 300, 231),
+                CatalogShortcut("A.jpg", "landscape", -200, -156),
+                CatalogShortcut("B.jpg", "portrait", -300, -231),
             ]
         )
         recently_updated = []
@@ -63,8 +63,8 @@ class SelectPicture(unittest.TestCase):
         # Arrange
         oldest_shown = create_catalog_record_list(
             [
-                CatalogShortcut("A.jpg", "landscape", 200, 156),
-                CatalogShortcut("B.jpg", "portrait", 300, 231),
+                CatalogShortcut("A.jpg", "landscape", -200, -156),
+                CatalogShortcut("B.jpg", "portrait", -300, -231),
             ]
         )
         recently_updated = []

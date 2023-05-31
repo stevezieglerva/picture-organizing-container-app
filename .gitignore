@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 picture-organizing-container-app.code-workspace
 reports/**/**
+*current_resized*.jpg
