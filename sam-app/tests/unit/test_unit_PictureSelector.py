@@ -6,7 +6,11 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from domain.DatePicker import DateOptions
 from domain.DTOs import PictureSelectionOption
-from domain.PictureSelector import select_picture
+from domain.PictureSelector import (
+    get_device_name,
+    get_target_dimensions,
+    select_picture,
+)
 
 
 @dataclass(frozen=True)
@@ -79,6 +83,55 @@ class SelectPicture(unittest.TestCase):
 
         # Assert
         self.assertEqual(results.s3_url, "B.jpg")
+
+
+class GetTargetDimensions(unittest.TestCase):
+    def test_should_non_special_device(self):
+        # Arrange
+
+        # Act
+        width, height = get_target_dimensions(1000, 900, "Safari")
+        print(f"test results: {width}, {height}")
+
+        # Assert
+        self.assertEqual(width, 1000)
+        self.assertEqual(height, 900)
+
+    def test_should_add_height_for_steve_laptop(self):
+        # Arrange
+
+        # Act
+        width, height = get_target_dimensions(1920, 1500, "Mac OS")
+        print(f"test results: {width}, {height}")
+
+        # Assert
+        self.assertEqual(width, 1920)
+        self.assertEqual(height, 1550)
+
+    def test_should_add_height_for_charlotte_laptop(self):
+        # Arrange
+
+        # Act
+        width, height = get_target_dimensions(1112, 1500, "Mac OS")
+        print(f"test results: {width}, {height}")
+
+        # Assert
+        self.assertEqual(width, 1112)
+        self.assertEqual(height, 1570)
+
+
+class GetDeviceName(unittest.TestCase):
+    def test_should_get_steve_phone(self):
+        # Arrange
+
+        # Act
+        results = get_device_name(
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 Mobile/15E148 Safari/604.1"
+        )
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(results, "Steve Phone")
 
 
 if __name__ == "__main__":
