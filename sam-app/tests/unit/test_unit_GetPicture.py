@@ -11,62 +11,11 @@ from domain.DTOs import (
     PictureDBRecord,
     PictureSelectionOption,
 )
-from infrastructure.repository.CatalogRepo import StoringCatalogData
+from infrastructure.repository.CatalogRepo import FakeRepo
 from infrastructure.repository.DynamoDB import DynamoDB
 from infrastructure.repository.S3 import S3FakeLocal
 from infrastructure.system.Clock import FakeClock, ITellingTime
 from use_cases.GetPicture import GetPicture
-
-
-class FakeRepo(StoringCatalogData):
-    def __init__(self, db: DynamoDB, clock: ITellingTime):
-        self._clock = clock
-
-    def add_new_picture_to_catalog(
-        self, record: PictureCatalogGroup
-    ) -> PictureCatalogGroup:
-        pass
-
-    def get_gis_data_by_state(self, state_id: str) -> List[GISDBRecord]:
-        pass
-
-    def get_gis_data_by_lat_long(self, lat: float, long: float) -> List[GISDBRecord]:
-        pass
-
-    def get_recently_added(
-        self, delta: timedelta = timedelta(days=1)
-    ) -> List[PictureDBRecord]:
-        return self._updated
-
-    def get_oldest_shown(
-        self, delta: timedelta = timedelta(days=1)
-    ) -> List[PictureDBRecord]:
-        return self._oldest_shown
-
-    def set_recently_updated(self, data: list):
-        self._updated = [
-            PictureSelectionOption(
-                s3_url=i[0],
-                layout=i[1],
-                date_added=self._clock.get_time() + timedelta(i[2]),
-                last_shown=self._clock.get_time() + timedelta(i[3]),
-            )
-            for i in data
-        ]
-
-    def set_oldest_shown(self, data: list):
-        self._oldest_shown = [
-            PictureSelectionOption(
-                s3_url=i[0],
-                layout=i[1],
-                date_added=self._clock.get_time() + timedelta(i[2]),
-                last_shown=self._clock.get_time() + timedelta(i[3]),
-            )
-            for i in data
-        ]
-
-    def get_by_month_day(self):
-        pass
 
 
 class FakeRandomPicker(IDatePicker):

@@ -53,5 +53,5 @@ class GetPicture:
     def update_show_data(self):
         pass
 
-    def _resize_image_for_device(self):
+    def resize_image_for_device(self):
         pass
