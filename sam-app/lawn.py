@@ -1,11 +1,25 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 
-def get_dominant_color(image):
+def ceiling(value, grouping: int):
+    value = math.ceil(value / grouping) * grouping
+    if value > 255:
+        value = 255
+    return value
+
+
+def get_dominant_color(image, grouping: int):
     colors = image.getcolors(image.width * image.height)
     dominant_color = max(colors, key=lambda item: item[0])[1]
+    dominant_color = (
+        ceiling(dominant_color[0], grouping),
+        ceiling(dominant_color[1], grouping),
+        ceiling(dominant_color[2], grouping),
+    )
     return "#{:02x}{:02x}{:02x}".format(*dominant_color)
 
 
@@ -13,21 +27,6 @@ def rgb_to_hex(rgb_tuple):
     r, g, b = rgb_tuple
     hex_code = "#{:02x}{:02x}{:02x}".format(r, g, b)
     return hex_code
-
-
-def normalize_color(color_tuple, num_bins):
-    print(color_tuple)
-    # color = f"{color_tuple[0]}{color_tuple[1]}{color_tuple[2]}"
-    # print(color)
-    # rgb = tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
-    normalized_color = (
-        int(color_tuple[0] * num_bins / 256),
-        int(color_tuple[1] * num_bins / 256),
-        int(color_tuple[2] * num_bins / 256),
-    )
-    print(normalized_color)
-    normalized_hex = "#{:02x}{:02x}{:02x}".format(*normalized_color)
-    return normalized_hex
 
 
 def classify_color(hex_code):
@@ -78,12 +77,14 @@ def classify_color(hex_code):
 
 
 def generate_html_table(grid, image_path):
-    html = f"<img width=300px; src='{image_path}'/><table>"
+    html = f"<img width=300px; src='{image_path}'/><img src='lawn_histogram.jpg'/><br><table>"
     for row in grid:
         html += "<tr>"
         for color in row:
-            color_name = classify_color(color)
-            html += f'<td height=10px; width=10px; style="background-color: {color};">{color_name}</td>'
+            # color_name, matched_color = classify_color(color)
+            html += (
+                f'<td height=10px; width=10px; style="background-color: {color};"></td>'
+            )
         html += "</tr>"
     html += "</table>"
     return html
@@ -97,13 +98,14 @@ def rotate_grid(grid):
     return mirrored_grid
 
 
-def analyze_lawn(image_path, grid_size=(30, 25), num_bins=5):
+def analyze_lawn(image_path, width: int, grouping: int):
     # Load the image
     image = Image.open(image_path)
+    image = ImageOps.exif_transpose(image)
     print(image.size)
     aspect_ratio = image.size[0] / image.size[1]
     print(aspect_ratio)
-    width = 20
+
     height = int(width / aspect_ratio)
     grid_size = (width, height)
 
@@ -131,7 +133,7 @@ def analyze_lawn(image_path, grid_size=(30, 25), num_bins=5):
             cell_image = image.crop((left, upper, right, lower))
 
             # Calculate the dominant color in the cell
-            dominant_color = get_dominant_color(cell_image)
+            dominant_color = get_dominant_color(cell_image, grouping)
 
             # # Convert RGB to normalized color
             # normalized_color = normalize_color(dominant_color, num_bins)
@@ -157,11 +159,12 @@ def analyze_lawn(image_path, grid_size=(30, 25), num_bins=5):
     plt.bar(bins[:-1], histogram, color=bins[:-1])
     plt.xlabel("HTML Color Code")
     plt.ylabel("Count")
+    plt.ylim(0, 2500)
     plt.title("Histogram of Dominant Color Codes")
     plt.xticks(rotation=45)
     plt.savefig("lawn_histogram.jpg")
 
 
 # Usage example
-image_path = "lawn_1.jpg"  # Replace with the path to your image
-analyze_lawn(image_path)
+image_path = "lawn_5.jpg"  # Replace with the path to your image
+analyze_lawn(image_path, 75, 100)
