@@ -49,7 +49,6 @@ class GetPictureUseCase:
         picture = Picture(selected_picture.s3_url, self._imageio)
 
         resize_width, resize_height = get_target_dimensions(width, height, user_agent)
-
         resized_new_key = (
             f"{self._resized_path_prefix}current_resized_{random.randint(0, 100)}.jpg"
         )
@@ -68,7 +67,4 @@ class GetPictureUseCase:
         )
 
     def update_show_data(self):
-        pass
-
-    def resize_image_for_device(self):
         pass

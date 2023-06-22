@@ -96,6 +96,17 @@ class S3(S3Base):
         response = s3.delete_object(Bucket=bucket, Key=key)
         return response
 
+    def get_presigned_url(self, bucket, key) -> str:
+        s3 = boto3.client("s3")
+        presigned_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": bucket,
+                "Key": key,
+            },
+        )
+        return presigned_url
+
 
 class S3FakeLocal(S3Base):
     def put_object(self, bucket, key, data):
