@@ -1,33 +1,76 @@
+import json
+import math
 from collections import Counter
 
 import matplotlib.pyplot as plt
+import numpy as np
+from Picture import ImageIOLocal, Picture
 from PIL import Image, ImageOps
 
 
 def posterize(image_path: str, size: tuple = (8, 8)) -> Image:
     # Open the image
-    im = Image.open(image_path)
-    small = im.resize(size)
-    im_posterize = ImageOps.posterize(small, 2)
+    image = Picture(image_path, ImageIOLocal())._pil_image
+    small = image.resize(size)
+
+    np_image = np.array(small)
+
+    np_normalized = np.ceil(np_image / 100) * 100
+    np_normalized = np.clip(np_normalized, None, 255).astype(np.uint8)
+    im_posterize = Image.fromarray(np_normalized)
+
     return im_posterize
 
 
-def generate_color_palette(img):
-    # Convert the image to RGB mode
-    img_rgb = img.convert("RGB")
+def rgb_to_hex(rgb):
+    """Converts RGB color values to a hexadecimal color code."""
+    r, g, b = rgb
+    hex_code = "#{:02x}{:02x}{:02x}".format(r, g, b)
+    return hex_code
 
-    # Get the image histogram
-    histogram = img_rgb.histogram()
+
+def hex_to_rgb(hex_code):
+    """Converts a hexadecimal color code to RGB color values."""
+    hex_code = hex_code.lstrip("#")
+    r = int(hex_code[0:2], 16)
+    g = int(hex_code[2:4], 16)
+    b = int(hex_code[4:6], 16)
+    rgb = (r, g, b)
+    return rgb
+
+
+def filter_image_by_color(image, target_color_hex, size: tuple = (200, 200)):
+    target_color = hex_to_rgb(target_color_hex)
+
+    # Convert the image to a NumPy array
+    np_image = np.array(image)
+
+    # Convert the target color to NumPy array
+    target_color = np.array(target_color)
+
+    # Create a mask of pixels that match the target color
+    mask = np.all(np_image == target_color, axis=2)
+
+    # Create a new NumPy array with only the target color pixels
+    filtered_np_image = np.zeros_like(np_image)
+    filtered_np_image[mask] = target_color
+
+    # Create a PIL image from the filtered NumPy array
+    filtered_image = Image.fromarray(filtered_np_image)
+
+    return filtered_image
+
+
+def generate_color_palette(image_path: str, size: tuple = (200, 200)):
+    image = posterize(image_path, size)
+    image.save(f"output/posterize_{image_path}")
+
     # Get a flat list of RGB values for all pixels
     rgb_values = list(image.getdata())
 
-    # Print the RGB values
-    for rgb in rgb_values:
-        r, g, b = rgb
-        print(f"RGB values: R={r}, G={g}, B={b}")
-
     # Convert RGB values to HTML hex colors
     hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in rgb_values]
+    counter = Counter(hex_colors)
 
     # Count the occurrences of each color
     color_counts = {}
@@ -48,56 +91,64 @@ def generate_color_palette(img):
     plt.xticks(rotation=90)
 
     # Display the plot
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(f"output/histogram_{image_path}")
 
-    # # Initialize a Counter to count color occurrences
-    # color_counts = Counter()
+    # for count, color in enumerate(counter.most_common(3)):
+    for count, color in enumerate(
+        [("#c8c864", 0), ("#64c864", 0), ("#c8c8c8", 0), ("#ffc8c8", 0)]
+    ):
+        filtered_image = filter_image_by_color(image, color[0], size)
+        filename_color = color[0].strip("#")
+        file_name = f"output/filter_{count+1}_{image_path}"
+        filtered_image.save(file_name)
 
-    # # Iterate over the histogram bins (0-255)
-    # for count, i in enumerate(histogram):
-    #     # Skip empty bins
-    #     if count == 0:
-    #         continue
-    #     print(f"count: #{count}")
-    #     # Convert bin index to RGB values
-    #     r = i // 256 // 256
-    #     g = (i // 256) % 256
-    #     b = i % 256
-    #     print(count, r, g, b)
-
-    #     # Convert RGB values to HTML hex color
-    #     hex_color = f"#{r:02x}{g:02x}{b:02x}"
-
-    #     # Update color count
-    #     color_counts[hex_color] += count
-
-    # # Extract the HTML hex colors and their frequencies
-    # hex_colors = list(color_counts.keys())
-
-    # # Create a color palette image
-    # num_colors = len(hex_colors)
-    # palette_width = 50
-    # palette_height = 50
-    # palette_image = Image.new("RGB", (palette_width * num_colors, palette_height))
-
-    # # Draw color swatches on the palette image
-    # for i, color in enumerate(hex_colors):
-    #     swatch_start = i * palette_width
-    #     swatch_end = (i + 1) * palette_width
-    #     palette_image.paste(color, (swatch_start, 0, swatch_end, palette_height))
-
-    # # Display the color palette
-    # plt.imshow(palette_image)
-    # plt.axis("off")
-    # plt.title("Color Palette")
+    return counter
 
 
-# plt.show()
+from glob import glob
 
-
-image_path = "lawn_2.jpg"
 size = (200, 200)
-image = posterize(image_path, size)
-new_path = f"posterize_{image_path}.jpg"
-image.save(new_path)
-generate_color_palette(image)
+images = sorted(glob("2023*.jpg"))
+html = """<head>
+    <title>Lawn</title>
+</head>"""
+
+for image in images:
+    print(f"\n\n{image}")
+    color_counts = generate_color_palette(image, size)
+    top_pallete = ""
+    for color in color_counts.most_common(5):
+        print(color)
+
+    top_colors_list = [
+        f"<td style='padding: 5px; background-color: {c[0]};'>{c[0]}</td>"
+        for c in color_counts.most_common(5)
+    ]
+    top_colors = "".join(top_colors_list)
+    image_html = f"""
+<h1>{image}</h1>
+<table>
+<tr valign='top'>
+    <td><img src='output/{image}'></td>
+    <td><img src='output/posterize_{image}'></td>
+    <td><img src='output/histogram_{image}' width=400><br/>
+    <table>
+        <tr>
+    {       top_colors}
+        </tr>
+    </table>
+    </td>
+    <td><img src='output/filter_1_{image}'></td>
+    <td><img src='output/filter_2_{image}'></td>
+    <td><img src='output/filter_3_{image}'></td>
+    <td><img src='output/filter_4_{image}'></td>
+    
+</tr>
+</table>
+    """
+    html += image_html
+
+
+with open("lawn.html", "w") as file:
+    file.write(html)
