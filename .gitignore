@@ -162,3 +162,4 @@ picture-organizing-container-app.code-workspace
 reports/**/**
 *current_resized*.jpg
 *.html
+set_env.sh 
