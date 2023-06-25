@@ -1,3 +1,4 @@
+import json
 import logging
 from dataclasses import asdict, dataclass
 
@@ -47,3 +48,13 @@ class MoneyMaker:
             f"svz-master-pictures-new/{new_filename}", width=width
         )
         return new_filename, new_size
+
+    def record_meta_data(self, picture: Picture) -> str:
+        unique_filename = f"output/meta/unique_hash/{picture.hash_unique}.json"
+        with open(unique_filename, "w") as file:
+            file.write(picture.__repr__())
+
+        average_filename = f"output/meta/average_hash/{picture.hash_average_hash}.json"
+        with open(average_filename, "w") as file:
+            file.write(picture.__repr__())
+        return unique_filename, average_filename

@@ -199,5 +199,25 @@ class ResizeForS3(unittest.TestCase):
         self.assertNotEqual(orig_picture.hash_unique, resized_picture.hash_unique)
 
 
+class RecordMeta(unittest.TestCase):
+    def test_should_record_meta_data(self):
+        # Arrange
+        subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+        input = Picture(
+            "svz-master-pictures-new/original/2019/2019-04-14_Charlottesville_National_Championship_IMG_9003_-_Copy.JPG",
+            ImageIOS3(),
+        )
+
+        # Act
+        unique_filename, average_filename = subject.record_meta_data(input)
+        print(f"test results: {unique_filename}")
+
+        # Assert
+        self.assertEqual(
+            unique_filename,
+            "output/meta/unique_hash/9d7ffda27b041a7a0ad03ba4935007f6.json",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

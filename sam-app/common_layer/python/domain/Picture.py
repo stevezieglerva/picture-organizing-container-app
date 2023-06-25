@@ -236,6 +236,23 @@ long:        {self.gis_long}
 """
         return text
 
+    def __repr__(self):
+        text = f"""{{
+"source": "{self.source}",
+"taken" : "{self.taken}",
+"width": {self.width},
+"height": {self.height},
+"aspect":  {round(self.width / self.height, 2)},
+"orientation": "{self.orientation}",
+"model": "{self.model}",
+"lat": "{self.gis_lat}",
+"long": "{self.gis_long}",
+"hash_unique": "{self.hash_unique}",
+"hash_average_hash": "{self.hash_average_hash}"
+}}
+"""
+        return text
+
     def _convert_gis_dms_to_dd(self, gps_coords, gps_coords_ref):
         d, m, s = gps_coords
         dd = d + m / 60 + s / 3600
@@ -272,7 +289,6 @@ long:        {self.gis_long}
         return PictureSize(width=new_width, height=new_height)
 
     def resize_fitting_aspect_ratio(self, new_path, ideal_width, ideal_height):
-
         aspect = self.width / float(self.height)
         print(f"aspect: {aspect}")
         ideal_aspect = ideal_width / float(ideal_height)
