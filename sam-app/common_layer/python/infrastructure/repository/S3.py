@@ -91,6 +91,10 @@ class S3(S3Base):
         response = s3.get_object(Bucket=bucket, Key=key)
         return response["Body"].read()
 
+    def download_object(self, bucket, key, local_path: str):
+        s3 = boto3.client("s3")
+        s3.download_file(bucket, key, local_path)
+
     def delete_object(self, bucket, key):
         s3 = boto3.client("s3")
         response = s3.delete_object(Bucket=bucket, Key=key)
