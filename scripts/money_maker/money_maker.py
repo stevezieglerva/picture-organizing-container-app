@@ -28,10 +28,11 @@ class MoneyMaker:
     def get_new_db_filename(self, old_filename: str) -> str:
         return "/" + old_filename
 
-    def get_new_s3_filename(self, old_filename: str) -> str:
+    def get_new_s3_filename(self, old_filename: str, size: int = 100) -> str:
+        new_folder = f"Wx{size}"
         if old_filename.startswith("raw-photos"):
-            old_filename.replace("raw-photos/", "raw-photos/thumbnails/")
-        return "raw-photos/thumbnails/" + old_filename
+            return old_filename.replace("raw-photos/", f"raw-photos/{new_folder}/")
+        return f"raw-photos/{new_folder}/" + old_filename
 
     def move_to_dropbox(self, s3_key: str):
         new_filename = self.get_new_db_filename(s3_key)
@@ -39,8 +40,10 @@ class MoneyMaker:
         self.__dropbox.upload_file_bytes(file_bytes, new_filename)
         return len(file_bytes)
 
-    def resize_for_s3(self, key: str):
-        new_filename = self.get_new_s3_filename(key)
+    def resize_for_s3(self, key: str, width: int):
+        new_filename = self.get_new_s3_filename(key, width)
         picture = Picture(f"svz-master-pictures-new/{key}", ImageIOS3())
-        new_size = picture.resize(f"svz-master-pictures-new/{new_filename}", width=100)
+        new_size = picture.resize(
+            f"svz-master-pictures-new/{new_filename}", width=width
+        )
         return new_filename, new_size

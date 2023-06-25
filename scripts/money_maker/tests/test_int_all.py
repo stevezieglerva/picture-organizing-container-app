@@ -78,7 +78,7 @@ class GetNewFilenames(unittest.TestCase):
             results, "/raw-photos/2023/2023-06-12 Pictures MOV/2023-06-12 22.44.42.mov"
         )
 
-    def test_should_get_new_s3_filename_for_movie(self):
+    def test_should_get_new_s3_filename_for_raw_photos_pic(self):
         # Arrange
         subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
 
@@ -91,7 +91,35 @@ class GetNewFilenames(unittest.TestCase):
         # Assert
         self.assertEqual(
             results,
-            "raw-photos/thumbnails/2023/2023-06-12 Pictures/2023-06-12 22.44.42.jpg",
+            "raw-photos/Wx100/2023/2023-06-12 Pictures/2023-06-12 22.44.42.jpg",
+        )
+
+    def test_should_get_new_s3_filename_for_test_pic(self):
+        # Arrange
+        subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+
+        # Act
+        results = subject.get_new_s3_filename("test/2023-06-12 22.44.42.jpg")
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(
+            results,
+            "raw-photos/Wx100/test/2023-06-12 22.44.42.jpg",
+        )
+
+    def test_should_get_new_s3_filename_for_test_pic_midsize(self):
+        # Arrange
+        subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+
+        # Act
+        results = subject.get_new_s3_filename("test/2023-06-12 22.44.42.jpg", 1500)
+        print(f"test results: {results}")
+
+        # Assert
+        self.assertEqual(
+            results,
+            "raw-photos/Wx1500/test/2023-06-12 22.44.42.jpg",
         )
 
 
@@ -109,21 +137,66 @@ class MoveToDB(unittest.TestCase):
 
 
 class ResizeForS3(unittest.TestCase):
-    def test_should_resize_small_version(self):
+    def test_should_resize_thumbnail_version(self):
         # Arrange
         subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+        orig_picture = Picture(
+            "svz-master-pictures-new/tests/sample_1_with_gps.jpg",
+            ImageIOS3(),
+        )
+        self.assertGreaterEqual(orig_picture.width, 2000)
 
         # Act
-        filename, size = subject.resize_for_s3("tests/sample_1_with_gps.jpg")
+        filename, size = subject.resize_for_s3("tests/sample_1_with_gps.jpg", 200)
         print(f"test results: {filename}")
 
         # Assert
-        self.assertEqual(filename, "raw-photos/thumbnails/tests/sample_1_with_gps.jpg")
-        self.assertEqual(size.width, 100)
-        picture = Picture("svz-master-pictures-new/" + filename, ImageIOS3())
-        print(picture)
-        self.assertEqual(picture.width, 100)
-        self.assertEqual(picture.gis_lat, 35.7374917)
+        self.assertEqual(filename, "raw-photos/Wx200/tests/sample_1_with_gps.jpg")
+        self.assertEqual(size.width, 200)
+        resized_picture = Picture("svz-master-pictures-new/" + filename, ImageIOS3())
+        print(resized_picture)
+        self.assertEqual(resized_picture.width, 200)
+        self.assertEqual(resized_picture.gis_lat, 35.7374917)
+        print(
+            f"   orig_picture.hash_average_hash: {str(orig_picture.hash_average_hash)}\nresized_picture.hash_average_hash: {str(resized_picture.hash_average_hash)}"
+        )
+        print(orig_picture.hash_average_hash - resized_picture.hash_average_hash)
+        self.assertLessEqual(
+            orig_picture.hash_average_hash - resized_picture.hash_average_hash,
+            0,
+            "average_hash is different",
+        )
+        self.assertNotEqual(orig_picture.hash_unique, resized_picture.hash_unique)
+
+    def test_should_resize_small_version(self):
+        # Arrange
+        subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+        orig_picture = Picture(
+            "svz-master-pictures-new/tests/sample_1_with_gps.jpg",
+            ImageIOS3(),
+        )
+        self.assertGreaterEqual(orig_picture.width, 2000)
+
+        # Act
+        filename, size = subject.resize_for_s3("tests/sample_1_with_gps.jpg", 1500)
+        print(f"test results: {filename}")
+
+        # Assert
+        self.assertEqual(filename, "raw-photos/Wx1500/tests/sample_1_with_gps.jpg")
+        self.assertEqual(size.width, 1500)
+        resized_picture = Picture("svz-master-pictures-new/" + filename, ImageIOS3())
+        print(resized_picture)
+        self.assertEqual(resized_picture.width, 1500)
+        self.assertEqual(resized_picture.gis_lat, 35.7374917)
+        print(
+            f"orig_picture.hash_average_hash: {orig_picture.hash_average_hash}\nresized_picture.hash_average_hash: {resized_picture.hash_average_hash}"
+        )
+        self.assertEqual(
+            orig_picture.hash_average_hash,
+            resized_picture.hash_average_hash,
+            "average hash is different",
+        )
+        self.assertNotEqual(orig_picture.hash_unique, resized_picture.hash_unique)
 
 
 if __name__ == "__main__":
