@@ -59,7 +59,9 @@ class GetList(unittest.TestCase):
         print(f"test results: {results}")
 
         # Assert
-        self.assertEqual(len(results), 1)
+        self.assertEqual(
+            results, ["raw-photos/2023/2023-06-12 Pictures MOV/2023-06-12 22.44.42.mov"]
+        )
 
 
 class GetNewFilenames(unittest.TestCase):
@@ -216,6 +218,31 @@ class RecordMeta(unittest.TestCase):
         self.assertEqual(
             unique_filename,
             "output/meta/unique_hash/9d7ffda27b041a7a0ad03ba4935007f6.json",
+        )
+
+
+class MoveFiles(unittest.TestCase):
+    def test_should_move_files_successfully(self):
+        # Arrange
+        subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
+
+        # Act
+        success, error = subject.move_files(
+            [
+                "raw-photos/2022/2022-01-02 Phone Pictures/family/2022-01-02 20.42.14.jpg",
+                "raw-photos/2022/2022-01-01 Pictures PNG/2022-01-01 12.25.41.png",
+            ]
+        )
+
+        # Assert
+        self.assertEqual(
+            success,
+            [
+                "raw-photos/2022/2022-01-02 Phone Pictures/family/2022-01-02 20.42.14.jpg"
+            ],
+        )
+        self.assertEqual(
+            error, ["raw-photos/2022/2022-01-01 Pictures PNG/2022-01-01 12.25.41.png"]
         )
 
 

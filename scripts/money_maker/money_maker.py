@@ -11,7 +11,7 @@ logging.basicConfig(
     filemode="a",
     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 
 
@@ -24,7 +24,7 @@ class MoneyMaker:
         list = self.__s3.list_objects("svz-master-pictures-new", prefix)
         if suffix == None:
             return list
-        return [o for o in list if o.key[-3:].lower() == suffix.lower()]
+        return [o.key for o in list if o.key[-3:].lower() == suffix.lower()]
 
     def get_new_db_filename(self, old_filename: str) -> str:
         return "/" + old_filename
@@ -58,3 +58,29 @@ class MoneyMaker:
         with open(average_filename, "w") as file:
             file.write(picture.__repr__())
         return unique_filename, average_filename
+
+    def move_files(self, keys: list) -> list:
+        success = []
+        error = []
+        for count, key in enumerate(keys):
+            logging.info(f"Processing #{count+1}: {key}")
+            if ".jpg" in key.lower() or ".jpeg" in key.lower():
+                try:
+                    for width in [200, 1500]:
+                        new_key, size = self.resize_for_s3(key, width)
+                        logging.info(f"\tresized: {new_key}")
+                    self.move_to_dropbox(new_key)
+                    success.append(key)
+                except Exception as e:
+                    logging.error(f"Exception processing '{key}': {e}")
+                    error.append(key)
+            else:
+                logging.info(f"\tSkipping resizing")
+                try:
+                    self.move_to_dropbox(key)
+                    success.append(key)
+                except Exception as e:
+                    logging.error(f"Exception processing '{key}': {e}")
+                    error.append(key)
+
+        return success, error
