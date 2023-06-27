@@ -39,7 +39,6 @@ class S3(S3Base):
     def put_object(self, bucket, key, data):
         s3 = boto3.client("s3")
         resp = s3.put_object(Bucket=bucket, Key=key, Body=data)
-        print(f"key: {key} resp {resp}")
         try:
             result = S3Object(
                 bucket=bucket, key=key, date=datetime.now().isoformat, size=len(data)
@@ -68,11 +67,9 @@ class S3(S3Base):
         return response
 
     def list_objects(self, bucket, prefix, total_max=0):
-        print(locals())
         s3 = boto3.client("s3")
         results = []
         continuation_token = "start"
-        print(f"Prefix: {prefix}")
         while continuation_token:
             if continuation_token == "start":
                 if total_max > 0:
@@ -90,15 +87,12 @@ class S3(S3Base):
                     ContinuationToken=continuation_token,
                 )
                 results.extend(response["Contents"])
-            print(f"\tTotal objects: {len(results)}")
             continuation_token = response.get("NextContinuationToken", False)
             if total_max > 0 and len(results) >= total_max:
                 continuation_token = ""
-                print("Stopping since total_max hit")
 
         s3_results = []
         for object in results:
-            # print(json.dumps(object, indent=3, default=str))
             file = S3Object(
                 bucket=bucket,
                 key=object["Key"],
@@ -153,13 +147,11 @@ class S3FakeLocal(S3Base):
 
     def get_object(self, bucket, key):
         filename = f"test_fakes3_integration_{bucket}__{key.replace('/', '__')}"
-        print(f"Reading: {filename}")
         with open(filename, "r") as file:
             return file.read()
 
     def delete_object(self, bucket, key):
         filename = f"test_fakes3_integration_{bucket}__{key.replace('/', '__')}"
-        print(f"Deleting: {filename}")
         os.remove(filename)
 
     def get_presigned_url(self, bucket, key) -> str:

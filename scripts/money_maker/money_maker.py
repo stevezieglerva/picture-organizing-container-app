@@ -7,6 +7,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from io import BytesIO
+from pathlib import Path
 
 from DropboxRepo import DropboxRepo
 from Picture import ImageIOLocal, ImageIOS3, Picture, PictureSize
@@ -28,9 +29,14 @@ class MoneyMaker:
 
     def get_files(self, prefix: str, suffix: str = None) -> list:
         list = self.__s3.list_objects("svz-master-pictures-new", prefix)
+        only_media_files = [
+            o.key
+            for o in list
+            if Path(o.key).suffix.lower() in [".jpg", ".jpeg", ".png", ".mov"]
+        ]
         if suffix == None:
-            return [o.key for o in list]
-        return [o.key for o in list if o.key[-3:].lower() == suffix.lower()]
+            return only_media_files
+        return [o.key for o in only_media_files if o[-3:].lower() == suffix.lower()]
 
     def get_new_db_filename(self, old_filename: str) -> str:
         return "/" + old_filename
@@ -96,9 +102,9 @@ class MoneyMaker:
                     )
                     logging.info(f"\tCopied thumbnail to S3: {thumbnail_key}")
 
-                    small_size = f"temp_Wx1500_{temp_filename}"
-                    picture.resize(small_size, width=1500)
-                    dropbox_filename = key.replace("raw-photos", "/raw-photos/Wx1500")
+                    small_size = f"temp_W2000_{temp_filename}"
+                    picture.resize(small_size, width=2000)
+                    dropbox_filename = key.replace("raw-photos", "/raw-photos/Wx2000")
                     self.__dropbox.upload_file(small_size, dropbox_filename)
                     logging.info(f"\tUploaded to Dropbox: {dropbox_filename}")
 
@@ -156,8 +162,8 @@ class MoneyMaker:
 
 {starting_prefix}: #{count} / {total_to_process}
 Seconds per file: {seconds_per_file}
-Elapsed:          {total_time_str} hours
-Remaining:        {time_left_str} hours
+Elapsed:          {total_time_str}
+Remaining:        {time_left_str}
 
 """
                 print(message)
@@ -183,12 +189,12 @@ Remaining:        {time_left_str} hours
         success_filename = (
             f"output/progress/filenames/{starting_prefix.replace('/', '_')}_success.txt"
         )
-        with open(success_filename, "w") as file:
+        with open(success_filename, "a") as file:
             file.writelines([r + "\n" for r in success])
         error_filename = (
             f"output/progress/filenames/{starting_prefix.replace('/', '_')}_error.txt"
         )
-        with open(error_filename, "w") as file:
+        with open(error_filename, "a") as file:
             file.writelines([r + "\n" for r in error])
 
 
@@ -196,7 +202,7 @@ def main(starting_prefix: str):
     db_oauth = os.environ["db"]
     app_key = os.environ["app_key"]
     mover = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
-    input = mover.get_files(f"raw-photos/2023/{starting_prefix}")
+    input = mover.get_files(f"raw-photos/{starting_prefix}")
 
     # Act
     success, error = mover.move_files(input, starting_prefix)

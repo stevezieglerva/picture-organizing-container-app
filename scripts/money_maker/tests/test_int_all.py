@@ -314,7 +314,7 @@ class IntegrationMoveFiles(unittest.TestCase):
     def test_should_move_files_successfully(self):
         # Arrange
         subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
-        prefix = "raw-photos/2023/2023-01"
+        prefix = "raw-photos/2023/2023-02"
         input = subject.get_files(prefix)
 
         # Act

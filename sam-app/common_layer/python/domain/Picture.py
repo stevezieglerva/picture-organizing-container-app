@@ -78,10 +78,8 @@ class ImageIOLocal:
 
         current_exif = image.info.get("exif", None)
         if current_exif == None:
-            print("saving without exif")
             return image.save(new_path, format)
         else:
-            print("saving with exif")
             return image.save(new_path, format, exif=image.info["exif"])
 
     def get_image_bytes(self, source):
