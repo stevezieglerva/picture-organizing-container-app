@@ -53,9 +53,9 @@ class S3(S3Base):
             )
         return result
 
-    def upload_file(self, local_file, key):
+    def upload_file(self, bucket: str, local_file: str, key: str):
         s3 = boto3.resource("s3")
-        s3.Bucket("bucketname").upload_file(local_file, key)
+        s3.Bucket(bucket).upload_file(local_file, key)
 
     def rename(self, bucket, old_key: str, new_key: str):
         s3 = boto3.client("s3")

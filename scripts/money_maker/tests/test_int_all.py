@@ -314,10 +314,11 @@ class IntegrationMoveFiles(unittest.TestCase):
     def test_should_move_files_successfully(self):
         # Arrange
         subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
-        input = subject.get_files("raw-photos/2023/2023-06")
+        prefix = "raw-photos/2023/2023-01"
+        input = subject.get_files(prefix)
 
         # Act
-        success, error = subject.move_files(input[0:6], "2023-06-05")
+        success, error = subject.move_files(input, prefix)
 
         # Assert
         self.assertNotEqual(

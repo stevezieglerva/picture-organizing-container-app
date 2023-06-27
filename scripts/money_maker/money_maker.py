@@ -108,6 +108,7 @@ class MoneyMaker:
                             "raw-photos", "moved_to_dropbox"
                         )
                         self.__s3.upload_file(
+                            "svz-master-pictures-new",
                             small_size,
                             small_s3_archive_key,
                         )
@@ -117,7 +118,8 @@ class MoneyMaker:
                         self.__s3.delete_object("svz-master-pictures-new", key)
 
                     self.record_meta_data(picture)
-
+                    os.remove(thumbnail_size)
+                    os.remove(small_size)
                     success.append(key)
                 except Exception as e:
                     logging.error(f"Exception processing '{key}': {e}")
@@ -138,10 +140,28 @@ class MoneyMaker:
                 self.log_success(success, error, key, starting_prefix)
                 current = datetime.now()
                 elapsed = current - start
+                days, hours, minutes = self.days_hours_minutes(elapsed)
                 seconds_per_file = int(elapsed.seconds / count)
-                print(
-                    f"\n\n{starting_prefix}: #{count} / {total_to_process}, seconds per file: {seconds_per_file}\n\n"
-                )
+                total_time_str = f"{str(hours).zfill(2)}:{str(minutes).zfill(2)}"
+                files_left = total_to_process - count
+                total_seconds_left = seconds_per_file * files_left
+                seconds = total_seconds_left % (24 * 3600)
+                hour = seconds // 3600
+                seconds %= 3600
+                minutes = seconds // 60
+                seconds %= 60
+                time_left_str = f"{str(hour).zfill(2)}:{str(minutes).zfill(2)}"
+
+                message = f"""
+
+{starting_prefix}: #{count} / {total_to_process}
+Seconds per file: {seconds_per_file}
+Elapsed:          {total_time_str} hours
+Remaining:        {time_left_str} hours
+
+"""
+                print(message)
+                logging.info(message)
 
         self.log_success(success, error, key, starting_prefix)
         current = datetime.now()
@@ -150,19 +170,24 @@ class MoneyMaker:
         days, hours, minutes = self.days_hours_minutes(elapsed)
 
         total_time_str = f"{hours}:{str(minutes).zfill(2)}"
-        print(
-            f"\n\nTotals for {starting_prefix}:\nFiles: {count}\nseconds per file: {seconds_per_file}\nTotal time: {total_time_str}\n\n"
-        )
+        message = f"\n\nTotals for {starting_prefix}:\nFiles: {count}\nseconds per file: {seconds_per_file}\nTotal time: {total_time_str}\n\n"
+        print(message)
+        logging.info(message)
+        self.log_success(success, error, key, starting_prefix)
         return success, error
 
     def days_hours_minutes(self, td):
         return td.days, td.seconds // 3600, (td.seconds // 60) % 60
 
     def log_success(self, success, error, key, starting_prefix):
-        success_filename = f"output/progress/filenames/{starting_prefix}_success.txt"
+        success_filename = (
+            f"output/progress/filenames/{starting_prefix.replace('/', '_')}_success.txt"
+        )
         with open(success_filename, "w") as file:
             file.writelines([r + "\n" for r in success])
-        error_filename = f"output/progress/filenames/{starting_prefix}_error.txt"
+        error_filename = (
+            f"output/progress/filenames/{starting_prefix.replace('/', '_')}_error.txt"
+        )
         with open(error_filename, "w") as file:
             file.writelines([r + "\n" for r in error])
 

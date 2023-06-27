@@ -165,3 +165,4 @@ reports/**/**
 set_env.sh
 log.txt
 *.json
+temp*.jpg
