@@ -53,6 +53,20 @@ class S3(S3Base):
             )
         return result
 
+    def upload_file(self, local_file, key):
+        s3 = boto3.resource("s3")
+        s3.Bucket("bucketname").upload_file(local_file, key)
+
+    def rename(self, bucket, old_key: str, new_key: str):
+        s3 = boto3.client("s3")
+        response = s3.copy_object(
+            Bucket=bucket,
+            CopySource=f"{bucket}/{old_key}",
+            Key=new_key,
+        )
+        response = s3.delete_object(Bucket=bucket, Key=old_key)
+        return response
+
     def list_objects(self, bucket, prefix, total_max=0):
         print(locals())
         s3 = boto3.client("s3")
@@ -98,6 +112,10 @@ class S3(S3Base):
         s3 = boto3.client("s3")
         response = s3.get_object(Bucket=bucket, Key=key)
         return response["Body"].read()
+
+    def download_object(self, bucket, key, local_path: str):
+        s3 = boto3.client("s3")
+        s3.download_file(bucket, key, local_path)
 
     def download_object(self, bucket, key, local_path: str):
         s3 = boto3.client("s3")

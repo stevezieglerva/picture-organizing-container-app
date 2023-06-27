@@ -284,6 +284,7 @@ class MoveFiles(unittest.TestCase):
                 "raw-photos/2022/2022-01-01 Pictures PNG/2022-01-01 12.25.41.png",
             ],
             "testing",
+            False,
         )
         print(f"tests success: {success}")
         print(f"tests error: {error}")
@@ -309,15 +310,14 @@ class MoveFiles(unittest.TestCase):
         )
 
 
-@unittest.skip("too long")
 class IntegrationMoveFiles(unittest.TestCase):
     def test_should_move_files_successfully(self):
         # Arrange
         subject = MoneyMaker(S3(), DropboxRepo(db_oauth, app_key))
-        input = subject.get_files("raw-photos/2023/2023-06-05")
+        input = subject.get_files("raw-photos/2023/2023-06")
 
         # Act
-        success, error = subject.move_files(input, "2023-06-05")
+        success, error = subject.move_files(input[0:6], "2023-06-05")
 
         # Assert
         self.assertNotEqual(

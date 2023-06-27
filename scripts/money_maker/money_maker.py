@@ -5,6 +5,7 @@ import re
 import sys
 import uuid
 from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from io import BytesIO
 
 from DropboxRepo import DropboxRepo
@@ -64,9 +65,13 @@ class MoneyMaker:
             file.write(picture.__repr__())
         return unique_filename, average_filename
 
-    def move_files(self, keys: list, starting_prefix: str) -> list:
+    def move_files(
+        self, keys: list, starting_prefix: str, move_in_s3_for_completion: bool = True
+    ) -> list:
+        start = datetime.now()
         success = []
         error = []
+        total_to_process = len(keys)
         for count, key in enumerate(keys):
             logging.info(f"Processing #{count+1}: {key}")
             if ".jpg" in key.lower() or ".jpeg" in key.lower():
@@ -77,7 +82,6 @@ class MoneyMaker:
                         "svz-master-pictures-new", key, temp_filename
                     )
                     picture = Picture(temp_filename, ImageIOLocal())
-                    print(picture)
                     thumbnail_size = f"temp_Wx200_{temp_filename}"
                     picture.resize(thumbnail_size, width=200)
                     thumbnail_key = key.replace("raw-photos", "raw-photos/Wx200")
@@ -96,9 +100,24 @@ class MoneyMaker:
                     picture.resize(small_size, width=1500)
                     dropbox_filename = key.replace("raw-photos", "/raw-photos/Wx1500")
                     self.__dropbox.upload_file(small_size, dropbox_filename)
-
                     logging.info(f"\tUploaded to Dropbox: {dropbox_filename}")
+
+                    if move_in_s3_for_completion:
+                        small_s3_archive_key = dropbox_filename[1:]
+                        small_s3_archive_key = small_s3_archive_key.replace(
+                            "raw-photos", "moved_to_dropbox"
+                        )
+                        self.__s3.upload_file(
+                            small_size,
+                            small_s3_archive_key,
+                        )
+                        logging.info(
+                            f"\tUploaded small size to S3: {small_s3_archive_key}"
+                        )
+                        self.__s3.delete_object("svz-master-pictures-new", key)
+
                     self.record_meta_data(picture)
+
                     success.append(key)
                 except Exception as e:
                     logging.error(f"Exception processing '{key}': {e}")
@@ -108,15 +127,36 @@ class MoneyMaker:
                 logging.info(f"\tSkipping resizing")
                 try:
                     self.move_to_dropbox(key)
+                    archive_s3_key = key.replace("raw-photos", "moved_to_dropbox")
+                    self.__s3.rename("svz-master-pictures-new", key, archive_s3_key)
+                    logging.info(f"\tRenamed to: {archive_s3_key}")
                     success.append(key)
                 except Exception as e:
                     logging.error(f"Exception processing '{key}': {e}")
                     error.append(key)
-            if count % 5 == 0:
+            if count % 5 == 0 and count > 0:
                 self.log_success(success, error, key, starting_prefix)
-                print(f"\n\n{starting_prefix}: {count}\n\n")
+                current = datetime.now()
+                elapsed = current - start
+                seconds_per_file = int(elapsed.seconds / count)
+                print(
+                    f"\n\n{starting_prefix}: #{count} / {total_to_process}, seconds per file: {seconds_per_file}\n\n"
+                )
+
         self.log_success(success, error, key, starting_prefix)
+        current = datetime.now()
+        elapsed = current - start
+        seconds_per_file = int(elapsed.seconds / count)
+        days, hours, minutes = self.days_hours_minutes(elapsed)
+
+        total_time_str = f"{hours}:{str(minutes).zfill(2)}"
+        print(
+            f"\n\nTotals for {starting_prefix}:\nFiles: {count}\nseconds per file: {seconds_per_file}\nTotal time: {total_time_str}\n\n"
+        )
         return success, error
+
+    def days_hours_minutes(self, td):
+        return td.days, td.seconds // 3600, (td.seconds // 60) % 60
 
     def log_success(self, success, error, key, starting_prefix):
         success_filename = f"output/progress/filenames/{starting_prefix}_success.txt"
