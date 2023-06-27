@@ -40,9 +40,17 @@ class S3(S3Base):
         s3 = boto3.client("s3")
         resp = s3.put_object(Bucket=bucket, Key=key, Body=data)
         print(f"key: {key} resp {resp}")
-        result = S3Object(
-            bucket=bucket, key=key, date=datetime.now().isoformat, size=len(data)
-        )
+        try:
+            result = S3Object(
+                bucket=bucket, key=key, date=datetime.now().isoformat, size=len(data)
+            )
+        except TypeError:
+            result = S3Object(
+                bucket=bucket,
+                key=key,
+                date=datetime.now().isoformat,
+                size=data.getbuffer().nbytes,
+            )
         return result
 
     def list_objects(self, bucket, prefix, total_max=0):

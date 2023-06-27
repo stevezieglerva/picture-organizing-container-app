@@ -20,9 +20,17 @@ class DropboxRepo:
     def clear_nixplay_folder(self):
         return self.delete_files_from_folder("/nixplay-automatic")
 
-    def upload_file_bytes(self, file_bytes: bytes, file_path: str) -> str:
+    def upload_file_bytes(self, file_bytes: bytes, dropbox_file_path: str) -> str:
         """Copy the given byte string to the file path"""
-        results = self.dbx.files_upload(file_bytes, file_path)
+        results = self.dbx.files_upload(file_bytes, dropbox_file_path)
+        print(f"\t\t {results}")
+        return results.path_display
+
+    def upload_file(self, local_file_path: str, dropbox_file_path: str) -> str:
+        """Upload a local file"""
+        with open(local_file_path, "rb") as file:
+            file_bytes = file.read()
+        results = self.dbx.files_upload(file_bytes, dropbox_file_path)
         print(f"\t\t {results}")
         return results.path_display
 

@@ -66,7 +66,7 @@ class ImageIOLocal:
     def save(self, new_path: str, image: Image):
         path = Path(new_path)
         extension = path.suffix.lower()
-        print(f"\n\nExtension: {extension}")
+        # print(f"\n\nExtension: {extension}")
         if extension in [".jpeg", ".jpg"]:
             format = "JPEG"
         elif extension in [".png"]:
@@ -120,7 +120,7 @@ class ImageIOS3:
 
         key = new_path.replace(bucket + "/", "")
         extension = path.suffix.lower()
-        print(f"\n\nExtension: {extension}")
+        # print(f"\n\nExtension: {extension}")
         if extension in [".jpeg", ".jpg"]:
             format = "JPEG"
         elif extension in [".png"]:
@@ -190,16 +190,16 @@ class Picture:
             self.model = self._exif_image.model
         if "datetime" in tags:
             img_taken_str = self._exif_image.datetime
-            print(f"Raw img_taken_str: {img_taken_str}")
+            # print(f"Raw img_taken_str: {img_taken_str}")
             # Raw img_taken_str: 2016:09:25 16:25:02
             # Raw img_taken_str: 2023:02:04 17:37:40
             img_taken_colons_replace = re.sub(
                 r"(20..):(..):(..) ", r"\1-\2-\3 ", img_taken_str
             )
-            print(f"img_taken_colons_replace: {img_taken_colons_replace}")
+            # print(f"img_taken_colons_replace: {img_taken_colons_replace}")
             img_taken = parser.parse(img_taken_colons_replace)
             self.taken = img_taken
-            print(f"self.taken: {self.taken}")
+            # print(f"self.taken: {self.taken}")
         else:
             # Try to get date from filename
             # 2022-03-19_19.07.41
